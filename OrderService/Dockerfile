@@ -1,0 +1,18 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY OrderService.csproj ./
+RUN dotnet restore
+
+COPY . ./
+RUN dotnet publish -c Debug -o /app
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
+WORKDIR /app
+COPY --from=build /app .
+
+# Instala debugger
+RUN apt-get update && apt-get install -y unzip curl \
+    && curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l /vsdbg
+
+ENTRYPOINT ["dotnet", "OrderService.dll"]
