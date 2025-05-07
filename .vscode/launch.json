@@ -15,6 +15,9 @@
         "debuggerPath": "/vsdbg/vsdbg",
         "quoteArgs": false
       },
+      "sourceFileMap": {
+        "/src": "${workspaceFolder}/OrderService"
+      },
       "justMyCode": false
     }
   ]
