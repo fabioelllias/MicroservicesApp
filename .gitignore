@@ -7,7 +7,7 @@
 *.userprefs
 *.lock.json
 *.vs/
-*.vscode/
+#*.vscode/
 
 # Ignora arquivos de build e publicação
 [Dd]ebug/
