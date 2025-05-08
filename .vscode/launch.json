@@ -2,21 +2,36 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Attach to Docker (.NET Core)",
+      "name": "Attach to OrderService (Docker)",
       "type": "coreclr",
       "request": "attach",
       "processId": "1",
       "pipeTransport": {
         "pipeCwd": "${workspaceFolder}",
         "pipeProgram": "docker",
-        "pipeArgs": [
-          "exec", "-i", "orderservice"
-        ],
+        "pipeArgs": ["exec", "-i", "orderservice"],
         "debuggerPath": "/vsdbg/vsdbg",
         "quoteArgs": false
       },
       "sourceFileMap": {
         "/src": "${workspaceFolder}/OrderService"
+      },
+      "justMyCode": false
+    },
+    {
+      "name": "Attach to PaymentService (Docker)",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "1",
+      "pipeTransport": {
+        "pipeCwd": "${workspaceFolder}",
+        "pipeProgram": "docker",
+        "pipeArgs": ["exec", "-i", "paymentservice"],
+        "debuggerPath": "/vsdbg/vsdbg",
+        "quoteArgs": false
+      },
+      "sourceFileMap": {
+        "/src": "${workspaceFolder}/PaymentService"
       },
       "justMyCode": false
     }
