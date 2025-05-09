@@ -5,7 +5,8 @@ services:
     depends_on:
       - orderdb
     build:
-      context: ./OrderService
+      context: .
+      dockerfile: OrderService/Dockerfile
     volumes:
       - ./OrderService:/src
       - ~/.nuget/packages:/root/.nuget/packages:ro
@@ -17,7 +18,8 @@ services:
   paymentservice:
     container_name: paymentservice
     build:
-      context: ./PaymentService
+      context: .
+      dockerfile: PaymentService/Dockerfile
     volumes:
       - ./PaymentService:/src
       - ~/.nuget/packages:/root/.nuget/packages:ro

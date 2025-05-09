@@ -14,7 +14,7 @@
         "quoteArgs": false
       },
       "sourceFileMap": {
-        "/src": "${workspaceFolder}/OrderService"
+        "/src/OrderService": "${workspaceFolder}/OrderService"
       },
       "justMyCode": false
     },
@@ -31,7 +31,7 @@
         "quoteArgs": false
       },
       "sourceFileMap": {
-        "/src": "${workspaceFolder}/PaymentService"
+        "/src/PaymentService": "${workspaceFolder}/PaymentService"
       },
       "justMyCode": false
     }

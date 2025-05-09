@@ -1,4 +1,5 @@
 using MassTransit;
+using Contracts;
 
 public class OrderConsumer : IConsumer<Order>
 {
@@ -23,5 +24,3 @@ public class OrderConsumer : IConsumer<Order>
         Console.WriteLine($"Pagamento registrado para pedido: {context.Message.ProductName}");
     }
 }
-
-public record Order(Guid Id, string ProductName, int Quantity);

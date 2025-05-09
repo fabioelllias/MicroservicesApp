@@ -1,10 +1,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY *.csproj ./
-RUN dotnet restore
+COPY Contracts/Contracts.csproj ./Contracts/
+COPY PaymentService/PaymentService.csproj ./PaymentService/
 
-COPY . ./
+RUN dotnet restore ./PaymentService/PaymentService.csproj
+
+COPY Contracts ./Contracts
+COPY PaymentService ./PaymentService
+
+WORKDIR /src/PaymentService
 RUN dotnet publish -c Debug -o /app /p:DebugSymbols=true /p:DebugType=portable
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final
