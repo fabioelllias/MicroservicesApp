@@ -6,4 +6,5 @@ public class Payment
     public string ProductName { get; set; } = string.Empty;
     public int Quantity { get; set; }
     public DateTime ProcessedAt { get; set; } = DateTime.UtcNow;
+    public Guid OrderId { get; set; }
 }
