@@ -1,5 +1,6 @@
 version: '3.8'
 services:
+
   orderservice:
     container_name: orderservice
     depends_on:
@@ -27,3 +28,21 @@ services:
       - "5001:80"
     environment:
       - DOTNET_USE_POLLING_FILE_WATCHER=1
+  
+  notificationservice:
+    container_name: notificationservice
+    build:
+      context: .
+      dockerfile: NotificationService/Dockerfile
+    ports:
+      - "5002:80"
+    volumes:
+      - ./NotificationService:/src
+      - ~/.nuget/packages:/root/.nuget/packages:ro
+    depends_on:
+      - rabbitmq
+      - notificationdb
+    environment:
+      - DOTNET_USE_POLLING_FILE_WATCHER=1
+
+
