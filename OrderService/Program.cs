@@ -1,11 +1,24 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Contracts;
 using Polly;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var logPath = Path.Combine(AppContext.BaseDirectory, "logs", "orderservice-log-.txt");
+
+// 🔧 Inicializa Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File(logPath, rollingInterval: RollingInterval.Day, shared: true)
+    .CreateLogger();
+
 builder.WebHost.UseUrls("http://0.0.0.0:80");
+
+builder.Host.UseSerilog();
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql("Host=orderdb;Port=5432;Username=postgres;Password=postgres;Database=orderdb"));
@@ -36,7 +49,8 @@ var retryPolicy = Policy
         sleepDurationProvider: attempt => TimeSpan.FromSeconds(5),
         onRetry: (exception, time, retryCount, context) =>
         {
-            Console.WriteLine($"[Polly] Tentativa {retryCount}: aguardando {time.TotalSeconds}s - erro: {exception.Message}");
+            Log.Warning("[Polly] Tentativa {RetryCount}: aguardando {Seconds}s - erro: {Message}",
+                retryCount, time.TotalSeconds, exception.Message);
         });
 
 retryPolicy.Execute(() =>
@@ -49,4 +63,17 @@ retryPolicy.Execute(() =>
 app.UseSwagger();
 app.UseSwaggerUI();
 app.MapControllers();
-app.Run();
+
+
+try{
+    Log.Information("🚀 OrderService iniciado");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "A aplicação terminou inesperadamente");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

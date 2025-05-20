@@ -45,3 +45,4 @@ func-debug/
 
 # Ignora arquivos do Node.js (útil se o projeto usa frontend com Node)
 node_modules/
+logs/
