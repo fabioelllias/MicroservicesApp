@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Polly;
 using Serilog;
 using Serilog.Events;
+using Serilog.Sinks.Elasticsearch;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,12 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .WriteTo.File(logPath, rollingInterval: RollingInterval.Day, shared: true)
+    .WriteTo.Seq("http://seq:80")
+    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://elasticsearch:9200"))
+    {
+        AutoRegisterTemplate = true,
+        IndexFormat = "orderservice-logs-{0:yyyy.MM.dd}"
+    })
     .CreateLogger();
 
 builder.WebHost.UseUrls("http://0.0.0.0:80");
