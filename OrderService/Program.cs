@@ -20,9 +20,16 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://elasticsearch:9200"))
     {
         AutoRegisterTemplate = true,
-        IndexFormat = "orderservice-logs-{0:yyyy.MM.dd}"
+        IndexFormat = "orderservice-logs-{0:yyyy.MM.dd}",
+        ModifyConnectionSettings = conn =>
+            conn.ServerCertificateValidationCallback((o, certificate, chain, errors) => true) // <- Bypass
+               .DisableAutomaticProxyDetection(true)
+               .EnableDebugMode()
+               .ThrowExceptions()
     })
     .CreateLogger();
+   
+Serilog.Debugging.SelfLog.Enable(Console.Error);
 
 builder.WebHost.UseUrls("http://0.0.0.0:80");
 
