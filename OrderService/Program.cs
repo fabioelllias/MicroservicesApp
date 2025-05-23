@@ -1,10 +1,7 @@
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
+using OrderService.Extensions;
 using Polly;
 using Serilog;
-using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 
 
@@ -59,37 +56,15 @@ builder.Host.UseSerilog();
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql("Host=orderdb;Port=5432;Username=postgres;Password=postgres;Database=orderdb"));
 
-builder.Services.AddMassTransit(x =>
-{
-    x.UsingRabbitMq((ctx, cfg) =>
-    {
-        cfg.Host("rabbitmq", "/", h =>
-        {
-            h.Username("guest");
-            h.Password("guest");
-        });
-    });
-});
-
-builder.Services.AddOpenTelemetry()
-    .WithTracing(tracerProviderBuilder =>
-    {
-        tracerProviderBuilder
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
-            .SetResourceBuilder(
-                ResourceBuilder.CreateDefault()
-                    .AddService("OrderService")) // nome do serviço que aparece no Jaeger
-            .AddOtlpExporter(opt =>
-            {
-                opt.Endpoint = new Uri("http://jaeger:4317");
-            });
-    });
+builder.Services.AddMassTransitWithRabbitMq(); // extensão
+builder.Services.AddOpenTelemetryWithJaeger(); // extensão
 
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddCustomHealthChecks(builder.Configuration); // extensão
 
 var app = builder.Build();
 
@@ -116,6 +91,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.MapControllers();
 
+app.UseCustomHealthChecks(); // extensão
 
 try{
     Log.Information("🚀 OrderService iniciado");
