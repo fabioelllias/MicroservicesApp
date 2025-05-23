@@ -22,7 +22,7 @@ builder.Services.AddMassTransit(x =>
             h.Password("guest");
         });
 
-        cfg.ReceiveEndpoint("order-queue", e =>
+        cfg.ReceiveEndpoint("notification-service-queue", e =>
         {
             e.ConfigureConsumer<OrderConsumer>(ctx);
         });

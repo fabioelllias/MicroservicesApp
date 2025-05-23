@@ -1,5 +1,7 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Polly;
 using Serilog;
 using Serilog.Events;
@@ -9,27 +11,46 @@ using Serilog.Sinks.Elasticsearch;
 var builder = WebApplication.CreateBuilder(args);
 
 var logPath = Path.Combine(AppContext.BaseDirectory, "logs", "orderservice-log-.txt");
+// 🔧 Lê configuração do appsettings ou variáveis de ambiente
+var elasticUri = builder.Configuration["ElasticConfiguration:Uri"];
 
 // 🔧 Inicializa Serilog
-Log.Logger = new LoggerConfiguration()
+var loggerConfig = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .WriteTo.File(logPath, rollingInterval: RollingInterval.Day, shared: true)
-    .WriteTo.Seq("http://seq:80")
-    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://elasticsearch:9200"))
+    .WriteTo.Seq("http://seq:80");
+
+if (!string.IsNullOrEmpty(elasticUri))
+{
+    try
     {
-        AutoRegisterTemplate = true,
-        IndexFormat = "orderservice-logs-{0:yyyy.MM.dd}",
-        ModifyConnectionSettings = conn =>
+        loggerConfig.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(elasticUri))
+        {
+            AutoRegisterTemplate = true,
+            IndexFormat = "orderservice-log-{0:yyyy.MM.dd}",
+            ModifyConnectionSettings = conn =>
             conn.ServerCertificateValidationCallback((o, certificate, chain, errors) => true) // <- Bypass
                .DisableAutomaticProxyDetection(true)
                .EnableDebugMode()
                .ThrowExceptions()
-    })
-    .CreateLogger();
-   
-Serilog.Debugging.SelfLog.Enable(Console.Error);
+        });
+
+        Console.WriteLine("✅ Sink do Elasticsearch configurado com sucesso.");
+
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Falha ao configurar o sink do Elasticsearch: {ex.Message}");
+    }
+}
+else
+{
+    Console.WriteLine("⚠️ Elasticsearch não configurado. Logs serão enviados apenas para console e arquivo.");
+}
+
+Log.Logger = loggerConfig.CreateLogger();
 
 builder.WebHost.UseUrls("http://0.0.0.0:80");
 
@@ -49,6 +70,22 @@ builder.Services.AddMassTransit(x =>
         });
     });
 });
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracerProviderBuilder =>
+    {
+        tracerProviderBuilder
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .SetResourceBuilder(
+                ResourceBuilder.CreateDefault()
+                    .AddService("OrderService")) // nome do serviço que aparece no Jaeger
+            .AddOtlpExporter(opt =>
+            {
+                opt.Endpoint = new Uri("http://jaeger:4317");
+            });
+    });
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

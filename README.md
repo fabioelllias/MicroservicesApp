@@ -28,10 +28,12 @@ Agora, avançaremos com melhorias para produção.
 
 | Item                           | Descrição                                                            |
 |--------------------------------|------------------------------------------------------------------------|
-| ✅ **Logging estruturado**     | Serilog com sinks para console, arquivos, e Elastic (via Seq, ELK)     |
-| ✅ **Tracing distribuído**     | OpenTelemetry + Jaeger ou Zipkin                                      |
-| ✅ **Métricas Prometheus**     | Exposição de métricas HTTP com `prometheus-net.AspNetCore` + Grafana   |
-| ✅ **Health Checks**           | `AspNetCore.Diagnostics.HealthChecks` em `/health`                     |
+| ✅ **Logging estruturado**     | Serilog com sinks para console, arquivos e fallback para Elasticsearch |
+| ✅ **Tracing distribuído**     | OpenTelemetry com exportação para **Jaeger** via OTLP                 |
+| ✅ **Jaeger UI funcional**     | Visualização de spans HTTP com erros e latência                       |
+| ⏳ **Métricas Prometheus**     | (Planejado) Exposição de métricas HTTP com `prometheus-net` + Grafana |
+| ✅ **Health Checks**           | `AspNetCore.Diagnostics.HealthChecks` exposto via `/health`           |
+| ⏳ **Logs correlacionados**    | (Planejado) Incluir `TraceId` e `SpanId` nos logs do Serilog          |
 
 ---
 
@@ -41,7 +43,7 @@ Agora, avançaremos com melhorias para produção.
 |----------------------------------|---------------------------------------------------------------------------|
 | ✅ **Polly avançado**            | Retry com jitter, circuit breaker, timeout para chamadas externas         |
 | ✅ **Dead-letter monitoring**    | Monitoramento ativo das filas `_error` do RabbitMQ                        |
-| ✅ **Transactional outbox**     | Garante consistência eventual entre DB e mensagens                        |
+| ⏳ **Transactional outbox**     | (Planejado) Garante consistência eventual entre DB e mensagens            |
 | ✅ **Fallback handlers**        | Mensagens críticas podem ser enviadas para log alternativo ou quarentena  |
 
 ---
@@ -73,21 +75,22 @@ Agora, avançaremos com melhorias para produção.
 | Item                           | Descrição                                                         |
 |--------------------------------|-------------------------------------------------------------------|
 | ✅ **Docker Compose Prod**     | Separação de ambiente com volumes e restrições                    |
-| ✅ **Kubernetes (futuro)**     | Manifestos com Helm, Ingress, HorizontalPodAutoscaler             |
-| ✅ **Config centralizada**     | Considerar uso de Dapr ou Azure App Configuration no futuro       |
+| ⏳ **Kubernetes (futuro)**     | Manifestos com Helm, Ingress, HorizontalPodAutoscaler             |
+| ⏳ **Config centralizada**     | Considerar uso de Dapr ou Azure App Configuration no futuro       |
 
 ---
 
 ## 📋 Prioridades
 
 ### 🔹 Fase 1 – Curto prazo
-- [ ] Logging com Serilog
-- [ ] Health checks + Swagger
-- [ ] Criação de usuários com JWT
-- [ ] Retry e fallback com Polly
+- [x] Logging com Serilog
+- [x] Health checks + Swagger
+- [x] Criação de usuários com JWT
+- [x] Retry e fallback com Polly
+- [x] Tracing com OpenTelemetry + Jaeger
 
 ### 🔹 Fase 2 – Médio prazo
-- [ ] Observabilidade com OpenTelemetry + Jaeger
+- [ ] Correlacionar logs com TraceId/SpanId
 - [ ] Métricas com Prometheus + Grafana
 - [ ] Testes de integração com Testcontainers
 - [ ] CI/CD com GitHub Actions

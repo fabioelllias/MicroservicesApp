@@ -9,6 +9,14 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - elastic-net
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
 
   orderdb:
     image: postgres
@@ -20,6 +28,11 @@ services:
       - "5433:5432"
     networks:
       - elastic-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   paymentdb:
     image: postgres
@@ -29,6 +42,13 @@ services:
       POSTGRES_DB: paymentdb
     ports:
       - "5434:5432"
+    networks:
+      - elastic-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   notificationdb:
     image: postgres
@@ -38,3 +58,14 @@ services:
       POSTGRES_DB: notificationdb
     ports:
       - "5435:5432"
+    networks:
+      - elastic-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  elastic-net:
+    external: true
