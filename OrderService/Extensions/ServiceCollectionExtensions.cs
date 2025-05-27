@@ -6,6 +6,7 @@ using HealthChecks.UI.Client;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
 using Microsoft.Extensions.DependencyInjection;
+using Prometheus;
 
 namespace OrderService.Extensions
 {
@@ -86,6 +87,18 @@ namespace OrderService.Extensions
             {
                 options.UIPath = "/health-ui";
                 options.ApiPath = "/health-ui-api";
+            });
+
+            return app;
+        }
+
+        public static IApplicationBuilder UseCustomMetrics(this IApplicationBuilder app)
+        {
+            app.UseHttpMetrics();
+
+            app.UseEndpoints(endpoints =>
+            {   
+                endpoints.MapMetrics("/metrics"); // aqui define o endpoint
             });
 
             return app;

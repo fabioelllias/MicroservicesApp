@@ -19,8 +19,8 @@ WORKDIR /app
 COPY --from=build /app .
 
 # 🧰 Instalações auxiliares (já existentes)
-RUN apt-get update && apt-get install -y unzip curl \
- && curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l /vsdbg
+# RUN apt-get update && apt-get install -y unzip curl \
+#  && curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l /vsdbg
 
 # ✅ Healthcheck: espera que o SEQ esteja acessível
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \

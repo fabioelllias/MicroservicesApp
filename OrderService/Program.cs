@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using OrderService.Extensions;
 using Polly;
+using Prometheus;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 
@@ -90,7 +91,9 @@ retryPolicy.Execute(() =>
 app.UseSwagger();
 app.UseSwaggerUI();
 app.MapControllers();
+app.UseRouting();
 
+app.UseCustomMetrics(); // extensão
 app.UseCustomHealthChecks(); // extensão
 
 try{
