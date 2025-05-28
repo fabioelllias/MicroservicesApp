@@ -1,22 +1,28 @@
+// OrderService/Program.cs (com TraceId e SpanId nos logs)
 using Microsoft.EntityFrameworkCore;
 using OrderService.Extensions;
 using Polly;
-using Prometheus;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
-
+using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
+using System.Diagnostics;
+using Contracts.Observability;
+using OpenTelemetry.Context.Propagation;
+using OpenTelemetry;
+using OrderService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var logPath = Path.Combine(AppContext.BaseDirectory, "logs", "orderservice-log-.txt");
-// 🔧 Lê configuração do appsettings ou variáveis de ambiente
 var elasticUri = builder.Configuration["ElasticConfiguration:Uri"];
 
-// 🔧 Inicializa Serilog
+// Inicializa Serilog com TraceId e SpanId
 var loggerConfig = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .Enrich.FromLogContext()
-    .WriteTo.Console()
+    .Enrich.With<ActivityEnricher>()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} TraceId={TraceId} SpanId={SpanId}{NewLine}{Exception}")
     .WriteTo.File(logPath, rollingInterval: RollingInterval.Day, shared: true)
     .WriteTo.Seq("http://seq:80");
 
@@ -29,14 +35,12 @@ if (!string.IsNullOrEmpty(elasticUri))
             AutoRegisterTemplate = true,
             IndexFormat = "orderservice-log-{0:yyyy.MM.dd}",
             ModifyConnectionSettings = conn =>
-            conn.ServerCertificateValidationCallback((o, certificate, chain, errors) => true) // <- Bypass
-               .DisableAutomaticProxyDetection(true)
-               .EnableDebugMode()
-               .ThrowExceptions()
+                conn.ServerCertificateValidationCallback((o, certificate, chain, errors) => true)
+                    .DisableAutomaticProxyDetection(true)
+                    .EnableDebugMode()
+                    .ThrowExceptions()
         });
-
         Console.WriteLine("✅ Sink do Elasticsearch configurado com sucesso.");
-
     }
     catch (Exception ex)
     {
@@ -51,35 +55,40 @@ else
 Log.Logger = loggerConfig.CreateLogger();
 
 builder.WebHost.UseUrls("http://0.0.0.0:80");
-
 builder.Host.UseSerilog();
+
+// OpenTelemetry para rastreamento distribuído
+Sdk.SetDefaultTextMapPropagator(new TraceContextPropagator());
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(b => b
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddSource("OrderService")
+        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OrderService"))
+        .AddJaegerExporter());
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql("Host=orderdb;Port=5432;Username=postgres;Password=postgres;Database=orderdb"));
 
-builder.Services.AddMassTransitWithRabbitMq(); // extensão
-builder.Services.AddOpenTelemetryWithJaeger(); // extensão
-
-
+builder.Services.AddMassTransitWithRabbitMq();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCustomHealthChecks(builder.Configuration);
+builder.Services.AddOpenTelemetryWithJaeger();
 
-builder.Services.AddCustomHealthChecks(builder.Configuration); // extensão
+builder.Services.AddScoped<IOrderPublisher, OrderPublisher>();
 
 var app = builder.Build();
 
 // Retry com Polly para garantir que o banco esteja pronto
 var retryPolicy = Policy
     .Handle<Exception>()
-    .WaitAndRetry(
-        retryCount: 5,
-        sleepDurationProvider: attempt => TimeSpan.FromSeconds(5),
-        onRetry: (exception, time, retryCount, context) =>
-        {
-            Log.Warning("[Polly] Tentativa {RetryCount}: aguardando {Seconds}s - erro: {Message}",
-                retryCount, time.TotalSeconds, exception.Message);
-        });
+    .WaitAndRetry(5, attempt => TimeSpan.FromSeconds(5), (exception, time, retryCount, context) =>
+    {
+        Log.Warning("[Polly] Tentativa {RetryCount}: aguardando {Seconds}s - erro: {Message}", retryCount, time.TotalSeconds, exception.Message);
+    });
 
 retryPolicy.Execute(() =>
 {
@@ -90,13 +99,13 @@ retryPolicy.Execute(() =>
 
 app.UseSwagger();
 app.UseSwaggerUI();
-app.MapControllers();
 app.UseRouting();
+app.MapControllers();
+app.UseCustomMetrics();
+app.UseCustomHealthChecks();
 
-app.UseCustomMetrics(); // extensão
-app.UseCustomHealthChecks(); // extensão
-
-try{
+try
+{
     Log.Information("🚀 OrderService iniciado");
     app.Run();
 }

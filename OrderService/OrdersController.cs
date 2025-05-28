@@ -1,22 +1,21 @@
 using Contracts;
-using MassTransit;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using OrderService.Services;
 
 [ApiController]
 [Route("api/[controller]")]
 public class OrdersController : ControllerBase
 {
-    private readonly IPublishEndpoint _publishEndpoint;
+     private readonly IOrderPublisher _orderPublisher;
     private readonly ILogger<OrdersController> _logger;
     private readonly OrderDbContext _context;
 
     public OrdersController(
-        IPublishEndpoint publishEndpoint,
+        IOrderPublisher orderPublisher,
         ILogger<OrdersController> logger,
         OrderDbContext context)
     {
-        _publishEndpoint = publishEndpoint;
+        _orderPublisher = orderPublisher;
         _logger = logger;
         _context = context;
 
@@ -33,7 +32,8 @@ public class OrdersController : ControllerBase
 
             _logger.LogInformation("Novo pedido salvo no banco com ID {OrderId}", order.Id);
 
-            await _publishEndpoint.Publish(order);
+            await _orderPublisher.PublishAsync(order);
+
             _logger.LogInformation("Pedido com ID {OrderId} publicado no RabbitMQ", order.Id);
 
             return Ok("Pedido salvo e enviado");
