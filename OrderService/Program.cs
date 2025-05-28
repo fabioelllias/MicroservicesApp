@@ -6,11 +6,11 @@ using Serilog;
 using Serilog.Sinks.Elasticsearch;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
-using System.Diagnostics;
 using Contracts.Observability;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry;
 using OrderService.Services;
+using OpenTelemetry.Exporter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,12 +61,17 @@ builder.Host.UseSerilog();
 Sdk.SetDefaultTextMapPropagator(new TraceContextPropagator());
 
 builder.Services.AddOpenTelemetry()
-    .WithTracing(b => b
+    .ConfigureResource(resource => resource.AddService("OrderService"))
+    .WithTracing(tracing => tracing
+        .AddSource("OrderService")
+        .AddSource("MassTransit")
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
-        .AddSource("OrderService")
-        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("OrderService"))
-        .AddJaegerExporter());
+        .AddOtlpExporter(o => 
+        {
+            o.Endpoint = new Uri("http://jaeger:4317"); // Jaeger OTLP endpoint
+            o.Protocol = OtlpExportProtocol.Grpc;
+        }));
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql("Host=orderdb;Port=5432;Username=postgres;Password=postgres;Database=orderdb"));

@@ -7,8 +7,9 @@ using Serilog;
 using Contracts.Observability;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
-using OpenTelemetry.Trace;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using System.Diagnostics;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -27,10 +28,21 @@ builder.Logging.AddSerilog();
 // Configuração do OpenTelemetry com propagação e exportação para Jaeger (versão compatível)
 Sdk.SetDefaultTextMapPropagator(new TraceContextPropagator());
 
-builder.Services.AddOpenTelemetryTracing(b => b
-    .AddSource("PaymentService") // versão compatível com AddSource ao invés de AddActivitySource
-    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("PaymentService"))
-    .AddJaegerExporter());
+builder.Services.AddOpenTelemetry()
+    .WithTracing(builder =>
+    {
+        builder
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddSource("PaymentService")
+            .AddSource("MassTransit")
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("PaymentService"))
+           .AddOtlpExporter(o => 
+            {
+                o.Endpoint = new Uri("http://jaeger:4317"); // Jaeger OTLP endpoint
+                o.Protocol = OtlpExportProtocol.Grpc;
+            });
+    });
 
 builder.Services.AddDbContext<PaymentDbContext>(options =>
     options.UseNpgsql("Host=paymentdb;Port=5432;Username=postgres;Password=postgres;Database=paymentdb"));

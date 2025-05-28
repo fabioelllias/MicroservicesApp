@@ -36,6 +36,7 @@ public class OrderConsumer : IConsumer<Order>
             });
 
         Baggage.Current = parentContext.Baggage;
+        Activity.Current = null; // 🔥 limpa contexto anterior
 
         using var activity = ActivitySource.StartActivity(
             "Consume Order",
