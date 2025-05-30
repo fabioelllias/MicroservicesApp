@@ -44,8 +44,12 @@ builder.Services.AddOpenTelemetry()
             });
     });
 
-builder.Services.AddDbContext<PaymentDbContext>(options =>
-    options.UseNpgsql("Host=paymentdb;Port=5432;Username=postgres;Password=postgres;Database=paymentdb"));
+builder.Services.AddDbContext<PaymentDbContext>((provider, options) =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
+});
+
 
 builder.Services.AddMassTransit(x =>
 {
