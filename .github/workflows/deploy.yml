@@ -1,0 +1,35 @@
+name: 🚀 Deploy para GHCR
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  docker-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v3
+
+      - name: 🔐 Login no GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: 🏗️ Build e Push OrderService
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/orderservice:latest ./OrderService
+          docker push ghcr.io/${{ github.repository_owner }}/orderservice:latest
+
+      - name: 🏗️ Build e Push PaymentService
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/paymentservice:latest ./PaymentService
+          docker push ghcr.io/${{ github.repository_owner }}/paymentservice:latest
+
+      - name: 🏗️ Build e Push NotificationService
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/notificationservice:latest ./NotificationService
+          docker push ghcr.io/${{ github.repository_owner }}/notificationservice:latest
+
