@@ -46,18 +46,13 @@ jobs:
       - name: 🛠️ Buildar solução
         run: dotnet build MicroservicesApp.sln --no-restore --configuration Release
 
-      - name: 🧪 Rodar testes com cobertura
-        run: |
-          dotnet test IntegrationTests/IntegrationTests.csproj --no-build --configuration Release \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=TestResults/coverage/ \
-            /p:UseSourceLink=true
+      - name: 🧪 Rodar testes com cobertura (XPlat)
+        run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --configuration Release --collect:"XPlat Code Coverage"
 
       - name: 📊 Gerar relatório de cobertura
         uses: danielpalme/ReportGenerator-GitHub-Action@5.1.26
         with:
-          reports: 'TestResults/coverage/coverage.opencover.xml'
+          reports: 'TestResults/**/coverage.cobertura.xml'
           targetdir: 'coveragereport'
           reporttypes: 'HtmlInline_AzurePipelines;Cobertura'
 
