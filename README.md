@@ -90,10 +90,10 @@ Agora, avançaremos com melhorias para produção.
 - [x] Tracing com OpenTelemetry + Jaeger
 
 ### 🔹 Fase 2 – Médio prazo
-- [ ] Correlacionar logs com TraceId/SpanId
-- [ ] Métricas com Prometheus + Grafana
-- [ ] Testes de integração com Testcontainers
-- [ ] CI/CD com GitHub Actions
+- [x] Correlacionar logs com TraceId/SpanId
+- [x] Métricas com Prometheus + Grafana
+- [x] Testes de integração com Testcontainers
+- [x] CI/CD com GitHub Actions
 
 ### 🔹 Fase 3 – Longo prazo
 - [ ] Transactional Outbox
