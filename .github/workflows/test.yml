@@ -1,0 +1,50 @@
+name: Testes de Integração
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      rabbitmq:
+        image: rabbitmq:3.12-management
+        ports:
+          - 5672:5672
+          - 15672:15672
+
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: payment
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v3
+
+      - name: 🧰 Instalar SDK do .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 🧱 Restaurar pacotes
+        run: dotnet restore MicroservicesApp.sln
+
+      - name: 🛠️ Buildar solução
+        run: dotnet build MicroservicesApp.sln --no-restore --configuration Release
+
+      - name: 🧪 Rodar testes de integração
+        run: dotnet test MicroservicesApp.sln --no-build --configuration Release --verbosity normal
