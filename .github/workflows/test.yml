@@ -51,12 +51,13 @@ jobs:
           dotnet test IntegrationTests/IntegrationTests.csproj --no-build --configuration Release \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=TestResults/coverage/
+            /p:CoverletOutput=TestResults/coverage/ \
+            /p:UseSourceLink=true
 
       - name: 📊 Gerar relatório de cobertura
         uses: danielpalme/ReportGenerator-GitHub-Action@5.1.26
         with:
-          reports: '**/coverage.opencover.xml'
+          reports: 'TestResults/coverage/coverage.opencover.xml'
           targetdir: 'coveragereport'
           reporttypes: 'HtmlInline_AzurePipelines;Cobertura'
 
