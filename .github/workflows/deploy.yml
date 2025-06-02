@@ -12,7 +12,7 @@ jobs:
       packages: write
 
     steps:
-      - name: 📥 Checkout do código
+      - name: 📅 Checkout do código
         uses: actions/checkout@v3
 
       - name: 🔐 Login no GHCR
@@ -20,16 +20,18 @@ jobs:
 
       - name: 🏗️ Build e Push OrderService
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/orderservice:latest ./OrderService
+          docker build -t ghcr.io/${{ github.repository_owner }}/orderservice:latest \
+            -f OrderService/Dockerfile .
           docker push ghcr.io/${{ github.repository_owner }}/orderservice:latest
 
       - name: 🏗️ Build e Push PaymentService
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/paymentservice:latest ./PaymentService
+          docker build -t ghcr.io/${{ github.repository_owner }}/paymentservice:latest \
+            -f PaymentService/Dockerfile .
           docker push ghcr.io/${{ github.repository_owner }}/paymentservice:latest
 
       - name: 🏗️ Build e Push NotificationService
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/notificationservice:latest ./NotificationService
+          docker build -t ghcr.io/${{ github.repository_owner }}/notificationservice:latest \
+            -f NotificationService/Dockerfile .
           docker push ghcr.io/${{ github.repository_owner }}/notificationservice:latest
-
