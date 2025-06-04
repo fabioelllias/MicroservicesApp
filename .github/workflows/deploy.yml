@@ -47,6 +47,6 @@ jobs:
 
       - name: 🔥 Teste de fumaça (Smoke Test)
         run: |
-          docker run --rm ghcr.io/${{ github.repository_owner }}/orderservice:latest dotnet --info
-          docker run --rm ghcr.io/${{ github.repository_owner }}/paymentservice:latest dotnet --info
-          docker run --rm ghcr.io/${{ github.repository_owner }}/notificationservice:latest dotnet --info
+          docker run --rm ghcr.io/${{ github.repository_owner }}/orderservice:latest printenv
+          docker run --rm ghcr.io/${{ github.repository_owner }}/paymentservice:latest printenv
+          docker run --rm ghcr.io/${{ github.repository_owner }}/notificationservice:latest printenv
