@@ -20,18 +20,27 @@ jobs:
 
       - name: 🏗️ Build e Push OrderService
         run: |
+          TAG=$(echo "${GITHUB_SHA}" | cut -c1-7)
           docker build -t ghcr.io/${{ github.repository_owner }}/orderservice:latest \
-            -f OrderService/Dockerfile .
+                       -t ghcr.io/${{ github.repository_owner }}/orderservice:$TAG \
+                       -f OrderService/Dockerfile .
           docker push ghcr.io/${{ github.repository_owner }}/orderservice:latest
+          docker push ghcr.io/${{ github.repository_owner }}/orderservice:$TAG
 
       - name: 🏗️ Build e Push PaymentService
         run: |
+          TAG=$(echo "${GITHUB_SHA}" | cut -c1-7)
           docker build -t ghcr.io/${{ github.repository_owner }}/paymentservice:latest \
-            -f PaymentService/Dockerfile .
+                       -t ghcr.io/${{ github.repository_owner }}/paymentservice:$TAG \
+                       -f PaymentService/Dockerfile .
           docker push ghcr.io/${{ github.repository_owner }}/paymentservice:latest
+          docker push ghcr.io/${{ github.repository_owner }}/paymentservice:$TAG
 
       - name: 🏗️ Build e Push NotificationService
         run: |
+          TAG=$(echo "${GITHUB_SHA}" | cut -c1-7)
           docker build -t ghcr.io/${{ github.repository_owner }}/notificationservice:latest \
-            -f NotificationService/Dockerfile .
+                       -t ghcr.io/${{ github.repository_owner }}/notificationservice:$TAG \
+                       -f NotificationService/Dockerfile .
           docker push ghcr.io/${{ github.repository_owner }}/notificationservice:latest
+          docker push ghcr.io/${{ github.repository_owner }}/notificationservice:$TAG
