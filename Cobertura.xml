@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
-<coverage line-rate="0.1926605504587156" branch-rate="0.2777777777777778" lines-covered="42" lines-valid="218" branches-covered="5" branches-valid="18" complexity="32" version="0" timestamp="1749061622">
+<coverage line-rate="0.1926605504587156" branch-rate="0.2777777777777778" lines-covered="42" lines-valid="218" branches-covered="5" branches-valid="18" complexity="32" version="0" timestamp="1749225055">
   <sources>
     <source>/home/runner/work/MicroservicesApp/MicroservicesApp/</source>
   </sources>
@@ -31,30 +31,30 @@
           <methods>
             <method name="get_Id" signature="()" line-rate="1" branch-rate="1" complexity="1">
               <lines>
-                <line number="10" hits="5" branch="false" />
+                <line number="5" hits="5" branch="false" />
               </lines>
             </method>
             <method name="get_ProductName" signature="()" line-rate="1" branch-rate="1" complexity="1">
               <lines>
-                <line number="13" hits="6" branch="false" />
+                <line number="7" hits="6" branch="false" />
               </lines>
             </method>
             <method name="get_Quantity" signature="()" line-rate="1" branch-rate="1" complexity="1">
               <lines>
-                <line number="16" hits="3" branch="false" />
+                <line number="9" hits="3" branch="false" />
               </lines>
             </method>
             <method name="get_CreatedAt" signature="()" line-rate="1" branch-rate="1" complexity="1">
               <lines>
-                <line number="19" hits="5" branch="false" />
+                <line number="11" hits="5" branch="false" />
               </lines>
             </method>
           </methods>
           <lines>
-            <line number="10" hits="5" branch="false" />
-            <line number="13" hits="6" branch="false" />
-            <line number="16" hits="3" branch="false" />
-            <line number="19" hits="5" branch="false" />
+            <line number="5" hits="5" branch="false" />
+            <line number="7" hits="6" branch="false" />
+            <line number="9" hits="3" branch="false" />
+            <line number="11" hits="5" branch="false" />
           </lines>
         </class>
         <class name="Contracts.Payment" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/Contracts/Payment.cs" line-rate="0.8" branch-rate="1" complexity="5">
