@@ -1,6 +1,26 @@
-@OrderService_HostAddress = http://localhost:5283
+### ✅ Requisição válida
+POST http://localhost:5001/orders
+Content-Type: application/json
 
-GET {{OrderService_HostAddress}}/weatherforecast/
-Accept: application/json
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "productName": "Teclado Gamer"
+}
 
-###
+### ❌ Requisição inválida - campos vazios
+POST http://localhost:5001/orders
+Content-Type: application/json
+
+{
+  "id": "",
+  "productName": ""
+}
+
+### ❌ Requisição inválida - nome curto
+POST http://localhost:5001/orders
+Content-Type: application/json
+
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "productName": "TV"
+}

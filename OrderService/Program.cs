@@ -11,6 +11,8 @@ using OpenTelemetry.Context.Propagation;
 using OpenTelemetry;
 using OrderService.Services;
 using OpenTelemetry.Exporter;
+using FluentValidation.AspNetCore;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,7 +79,13 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql("Host=orderdb;Port=5432;Username=postgres;Password=postgres;Database=orderdb"));
 
 builder.Services.AddMassTransitWithRabbitMq();
+
+ValidatorOptions.Global.LanguageManager = new PortugueseLanguageManager();
+
 builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<OrderValidator>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCustomHealthChecks(builder.Configuration);
