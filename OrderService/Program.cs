@@ -91,7 +91,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCustomHealthChecks(builder.Configuration);
 builder.Services.AddOpenTelemetryWithJaeger();
 
+builder.Services.AddCustomPolly(builder.Configuration);
+
 builder.Services.AddScoped<IOrderPublisher, OrderPublisher>();
+builder.Services.AddScoped<IExternalServiceClient, ExternalServiceClient>();
 
 var app = builder.Build();
 

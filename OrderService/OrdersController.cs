@@ -9,15 +9,17 @@ public class OrdersController : ControllerBase
      private readonly IOrderPublisher _orderPublisher;
     private readonly ILogger<OrdersController> _logger;
     private readonly OrderDbContext _context;
-
+    private readonly IExternalServiceClient _externalClient;
     public OrdersController(
         IOrderPublisher orderPublisher,
         ILogger<OrdersController> logger,
-        OrderDbContext context)
+        OrderDbContext context,
+        IExternalServiceClient externalClient)
     {
         _orderPublisher = orderPublisher;
         _logger = logger;
         _context = context;
+        _externalClient = externalClient;
 
         _logger.LogInformation("🎯 Teste de log no OrdersController");
     }
@@ -27,6 +29,10 @@ public class OrdersController : ControllerBase
     {
         try
         {
+
+            var result = await _externalClient.GetDataAsync();
+            _logger.LogInformation("Dados recebidos do serviço externo: {Data}", result);
+
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 

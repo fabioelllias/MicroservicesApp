@@ -41,7 +41,7 @@ Este projeto implementa uma arquitetura de microserviços em .NET 8 com:
 
 | Item                            | Descrição                                                                 |
 |----------------------------------|---------------------------------------------------------------------------|
-| ⏳ **Polly avançado**            | Retry com jitter, circuit breaker, timeout para chamadas externas         |
+| ✅ **Polly avançado**            | Retry com jitter, circuit breaker, timeout para chamadas externas         |
 | ⏳ **Dead-letter monitoring**    | Monitoramento ativo das filas `_error` do RabbitMQ                        |
 | ⏳ **Transactional outbox**     | Garante consistência eventual entre DB e mensagens                        |
 | ⏳ **Fallback handlers**        | Mensagens críticas podem ser enviadas para log alternativo ou quarentena  |
@@ -55,7 +55,7 @@ Este projeto implementa uma arquitetura de microserviços em .NET 8 com:
 | ✅ **xUnit + Moq**            | Testes unitários de services, consumers e lógica de domínio    |
 | ✅ **Testes de integração**   | Uso de `Testcontainers` para PostgreSQL e RabbitMQ             |
 | ✅ **Cobertura de código**    | Ferramentas como Coverlet + ReportGenerator                    |
-| ⏳ **Validações automáticas** | FluentValidation e integrações nos endpoints                   |
+| ✅ **Validações automáticas** | FluentValidation e integrações nos endpoints                   |
 
 ---
 
@@ -66,7 +66,7 @@ Este projeto implementa uma arquitetura de microserviços em .NET 8 com:
 | ⏳ **Hot reload com watch**  | `dotnet watch run` com suporte a file polling                   |
 | ✅ **VSDBG no Docker**        | Debug remoto ativado com `sourceFileMap` e attach               |
 | ✅ **CI (build/test)**        | GitHub Actions configurado para rodar testes e cobertura        |
-| ⏳ **CD (deploy)**            | (Planejado) Deploy automatizado via GitHub Actions ou Pipelines |
+| ✅ **CD (deploy)**            | Deploy automatizado via GitHub Actions ou Pipelines |
 | ⏳ **Ambientes separados**    | `docker-compose.override.dev.yml` e `docker-compose.override.prod.yml`
 
 ---

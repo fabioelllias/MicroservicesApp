@@ -7,6 +7,7 @@ using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
+using OrderService.Policies;
 
 namespace OrderService.Extensions
 {
@@ -71,6 +72,18 @@ namespace OrderService.Extensions
                 setup.SetEvaluationTimeInSeconds(15);
                 setup.AddHealthCheckEndpoint("Self", "http://orderservice:80/health");
             }).AddInMemoryStorage();
+
+            return services;
+        }
+
+        public static IServiceCollection AddCustomPolly(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddHttpClient("ExternalServiceClient", client =>{
+                    client.BaseAddress = new Uri("http://orderservice"); // ou http://orderservice:5002 se estiver em container
+                })      
+                .AddPolicyHandler(PollyPolicies.GetRetryPolicy())
+                .AddPolicyHandler(PollyPolicies.GetCircuitBreakerPolicy())
+                .AddPolicyHandler(PollyPolicies.GetTimeoutPolicy());
 
             return services;
         }
