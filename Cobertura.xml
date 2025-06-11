@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
-<coverage line-rate="0.1926605504587156" branch-rate="0.2777777777777778" lines-covered="42" lines-valid="218" branches-covered="5" branches-valid="18" complexity="32" version="0" timestamp="1749380143">
+<coverage line-rate="0.1926605504587156" branch-rate="0.2777777777777778" lines-covered="42" lines-valid="218" branches-covered="5" branches-valid="18" complexity="32" version="0" timestamp="1749682892">
   <sources>
     <source>/home/runner/work/MicroservicesApp/MicroservicesApp/</source>
   </sources>
