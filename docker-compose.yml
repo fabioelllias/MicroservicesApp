@@ -65,6 +65,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+ 
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - elastic-net
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
 
 networks:
   elastic-net:

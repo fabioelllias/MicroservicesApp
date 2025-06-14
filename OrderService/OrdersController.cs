@@ -1,5 +1,10 @@
+using System.Text.Json;
 using Contracts;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+using OrderService.Configurations;
+using OrderService.Models;
 using OrderService.Services;
 
 [ApiController]
@@ -10,18 +15,22 @@ public class OrdersController : ControllerBase
     private readonly ILogger<OrdersController> _logger;
     private readonly OrderDbContext _context;
     private readonly IExternalServiceClient _externalClient;
+    private readonly IMongoCollection<OutboxMessage> _outboxCollection;
+    private readonly IOptions<EventDeliverySettings> _deliverySettings;
     public OrdersController(
         IOrderPublisher orderPublisher,
         ILogger<OrdersController> logger,
         OrderDbContext context,
-        IExternalServiceClient externalClient)
+        IExternalServiceClient externalClient,
+        IMongoCollection<OutboxMessage> outboxCollection,
+        IOptions<EventDeliverySettings> deliverySettings)
     {
         _orderPublisher = orderPublisher;
         _logger = logger;
         _context = context;
         _externalClient = externalClient;
-
-        _logger.LogInformation("🎯 Teste de log no OrdersController");
+        _outboxCollection = outboxCollection;
+        _deliverySettings = deliverySettings;
     }
 
     [HttpPost]
@@ -30,17 +39,32 @@ public class OrdersController : ControllerBase
         try
         {
 
-            var result = await _externalClient.GetDataAsync();
-            _logger.LogInformation("Dados recebidos do serviço externo: {Data}", result);
+            // var result = await _externalClient.GetDataAsync();
+            // _logger.LogInformation("Dados recebidos do serviço externo: {Data}", result);
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Novo pedido salvo no banco com ID {OrderId}", order.Id);
 
-            await _orderPublisher.PublishAsync(order);
+             var strategy = _deliverySettings.Value.Strategy.ToLowerInvariant();
 
-            _logger.LogInformation("Pedido com ID {OrderId} publicado no RabbitMQ", order.Id);
+            if (strategy == "outbox")
+            {
+                var outboxMessage = new OutboxMessage
+                {
+                    EventType = "OrderCreated",
+                    Payload = JsonSerializer.Serialize(order)
+                };
+
+                await _outboxCollection.InsertOneAsync(outboxMessage);
+                _logger.LogInformation("📤 Evento gravado no outbox com ID {OutboxId}", outboxMessage.Id);
+            }
+            else
+            {
+                await _orderPublisher.PublishAsync(order);
+                _logger.LogInformation("📨 Evento publicado diretamente no RabbitMQ");
+            }
 
             return Ok("Pedido salvo e enviado");
         }

@@ -8,6 +8,9 @@ using OpenTelemetry.Resources;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
 using OrderService.Policies;
+using OrderService.Configurations;
+using MongoDB.Driver;
+using OrderService.Models;
 
 namespace OrderService.Extensions
 {
@@ -87,6 +90,23 @@ namespace OrderService.Extensions
 
             return services;
         }
+
+        public static void AddMongo(this IServiceCollection services, IConfiguration configuration)
+        {
+            var mongoSettings = configuration.GetSection("MongoSettings").Get<MongoSettings>();
+            services.AddSingleton(mongoSettings);
+
+            services.AddSingleton<IMongoClient>(sp =>
+                new MongoClient(mongoSettings?.ConnectionString));
+
+            services.AddScoped(sp =>
+            {
+                var client = sp.GetRequiredService<IMongoClient>();
+                return client.GetDatabase(mongoSettings?.DatabaseName)
+                            .GetCollection<OutboxMessage>(mongoSettings?.OutboxCollection);
+            });
+        }
+
 
         public static IApplicationBuilder UseCustomHealthChecks(this IApplicationBuilder app)
         {

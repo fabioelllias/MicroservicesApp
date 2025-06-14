@@ -43,7 +43,7 @@ Este projeto implementa uma arquitetura de microserviços em .NET 8 com:
 |----------------------------------|---------------------------------------------------------------------------|
 | ✅ **Polly avançado**            | Retry com jitter, circuit breaker, timeout para chamadas externas         |
 | ⏳ **Dead-letter monitoring**    | Monitoramento ativo das filas `_error` do RabbitMQ                        |
-| ⏳ **Transactional outbox**     | Garante consistência eventual entre DB e mensagens                        |
+| ✅ **Transactional outbox**     | Garante consistência eventual entre DB e mensagens                        |
 | ⏳ **Fallback handlers**        | Mensagens críticas podem ser enviadas para log alternativo ou quarentena  |
 
 ---

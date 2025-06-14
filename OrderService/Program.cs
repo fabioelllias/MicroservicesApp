@@ -13,6 +13,7 @@ using OrderService.Services;
 using OpenTelemetry.Exporter;
 using FluentValidation.AspNetCore;
 using FluentValidation;
+using OrderService.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,6 +78,11 @@ builder.Services.AddOpenTelemetry()
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql("Host=orderdb;Port=5432;Username=postgres;Password=postgres;Database=orderdb"));
+
+builder.Services.AddMongo(builder.Configuration);
+builder.Services.Configure<EventDeliverySettings>(
+    builder.Configuration.GetSection("EventDelivery"));
+builder.Services.AddHostedService<OutboxWorker>();
 
 builder.Services.AddMassTransitWithRabbitMq();
 
