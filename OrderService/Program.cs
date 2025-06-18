@@ -101,6 +101,7 @@ builder.Services.AddCustomPolly(builder.Configuration);
 
 builder.Services.AddScoped<IOrderPublisher, OrderPublisher>();
 builder.Services.AddScoped<IExternalServiceClient, ExternalServiceClient>();
+builder.Services.AddScoped<IOrderServiceClient, OrderServiceClient>();
 
 var app = builder.Build();
 

@@ -1,53 +1,48 @@
 using System.Text.Json;
-using Contracts;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using OrderService.Configurations;
 using OrderService.Models;
 using OrderService.Services;
+using Contracts;
 
-[ApiController]
-[Route("api/[controller]")]
-public class OrdersController : ControllerBase
+public class OrderServiceClient : IOrderServiceClient
 {
-     private readonly IOrderPublisher _orderPublisher;
-    private readonly ILogger<OrdersController> _logger;
+    private readonly IOrderPublisher _orderPublisher;
+    private readonly ILogger<OrderServiceClient> _logger;
     private readonly OrderDbContext _context;
-    private readonly IExternalServiceClient _externalClient;
     private readonly IMongoCollection<OutboxMessage> _outboxCollection;
-    private readonly IOptions<EventDeliverySettings> _deliverySettings;
-    public OrdersController(
+    private readonly EventDeliverySettings _deliverySettings;
+
+    public OrderServiceClient(
         IOrderPublisher orderPublisher,
-        ILogger<OrdersController> logger,
+        ILogger<OrderServiceClient> logger,
         OrderDbContext context,
-        IExternalServiceClient externalClient,
         IMongoCollection<OutboxMessage> outboxCollection,
         IOptions<EventDeliverySettings> deliverySettings)
     {
         _orderPublisher = orderPublisher;
         _logger = logger;
         _context = context;
-        _externalClient = externalClient;
         _outboxCollection = outboxCollection;
-        _deliverySettings = deliverySettings;
+        _deliverySettings = deliverySettings.Value;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Post([FromBody] Order order)
+    public async Task ProcessOrderAsync(Order order)
     {
         try
         {
 
+            // usado para testar a resiliencia com polly a serviço externo
             // var result = await _externalClient.GetDataAsync();
             // _logger.LogInformation("Dados recebidos do serviço externo: {Data}", result);
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Novo pedido salvo no banco com ID {OrderId}", order.Id);
+            _logger.LogInformation("✅ Pedido salvo no banco com ID {OrderId}", order.Id);
 
-             var strategy = _deliverySettings.Value.Strategy.ToLowerInvariant();
+            var strategy = _deliverySettings.Strategy.ToLowerInvariant();
 
             if (strategy == "outbox")
             {
@@ -58,20 +53,18 @@ public class OrdersController : ControllerBase
                 };
 
                 await _outboxCollection.InsertOneAsync(outboxMessage);
-                _logger.LogInformation("📤 Evento gravado no outbox com ID {OutboxId}", outboxMessage.Id);
+                _logger.LogInformation("📤 Evento gravado no Outbox com ID {OutboxId}", outboxMessage.Id);
             }
             else
             {
                 await _orderPublisher.PublishAsync(order);
                 _logger.LogInformation("📨 Evento publicado diretamente no RabbitMQ");
             }
-
-            return Ok("Pedido salvo e enviado");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao processar pedido com ID {OrderId}", order?.Id);
-            return StatusCode(500, "Erro ao processar o pedido");
+            _logger.LogError(ex, "❌ Erro ao processar pedido com ID {OrderId}", order?.Id);
+            throw;
         }
     }
 }
