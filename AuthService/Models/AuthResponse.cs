@@ -1,16 +1,7 @@
-using System.Text.Json.Serialization;
-
 public class AuthResponse
 {
-    [JsonPropertyName("access_token")]
-    public required string AccessToken { get; set; }
-
-    [JsonPropertyName("expires_in")]
-    public int ExpiresIn { get; set; }
-
-    [JsonPropertyName("refresh_token")]
-    public required string RefreshToken { get; set; }
-
-    [JsonPropertyName("token_type")]
-    public required string TokenType { get; set; }
+    public string Access_Token { get; set; } = string.Empty;
+    public string Id_Token { get; set; } = string.Empty;
+    public string Token_Type { get; set; } = string.Empty;
+    public int Expires_In { get; set; }
 }

@@ -1,8 +1,10 @@
+
 version: '3.8'
 
 services:
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -20,6 +22,7 @@ services:
 
   orderdb:
     image: postgres
+    container_name: orderdb
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -36,6 +39,7 @@ services:
 
   paymentdb:
     image: postgres
+    container_name: paymentdb
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -52,6 +56,7 @@ services:
 
   notificationdb:
     image: postgres
+    container_name: notificationdb
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -65,7 +70,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
- 
+
   mongodb:
     image: mongo
     container_name: mongodb
@@ -75,10 +80,24 @@ services:
       - elastic-net
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
-volumes:
-  mongo_data:
+  # redis:
+  #   image: redis:latest
+  #   container_name: redis
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - elastic-net
 
 networks:
   elastic-net:
-    external: true
+    driver: bridge
+
+volumes:
+  mongo_data:
+  seq-data:

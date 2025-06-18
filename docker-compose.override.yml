@@ -1,24 +1,27 @@
+
 version: '3.8'
+
 services:
 
   orderservice:
     container_name: orderservice
     build:
       context: .
-      dockerfile: OrderService/Dockerfile
+      dockerfile: OrderService/Dockerfile.dev
+    ports:
+      - "5000:80"
     volumes:
-      - ./OrderService:/src
+      - ./:/src
       - ~/.nuget/packages:/root/.nuget/packages:ro
       - ./logs:/app/logs
+    environment:
+      - DOTNET_USE_POLLING_FILE_WATCHER=1
+      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       rabbitmq:
         condition: service_healthy
       notificationdb:
         condition: service_healthy
-    ports:
-      - "5000:80"
-    environment:
-      - DOTNET_USE_POLLING_FILE_WATCHER=1
     networks:
       - elastic-net
 
@@ -26,59 +29,84 @@ services:
     container_name: paymentservice
     build:
       context: .
-      dockerfile: PaymentService/Dockerfile
+      dockerfile: PaymentService/Dockerfile.dev
+    ports:
+      - "5001:80"
     volumes:
-      - ./PaymentService:/src
+      - ./:/src
       - ~/.nuget/packages:/root/.nuget/packages:ro
+      - ./logs:/app/logs
+    environment:
+      - DOTNET_USE_POLLING_FILE_WATCHER=1
+      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       rabbitmq:
         condition: service_healthy
-      notificationdb:
+      paymentdb:
         condition: service_healthy
-    ports:
-      - "5001:80"
-    environment:
-      - DOTNET_USE_POLLING_FILE_WATCHER=1
     networks:
       - elastic-net
-  
+
   notificationservice:
     container_name: notificationservice
     build:
       context: .
-      dockerfile: NotificationService/Dockerfile
+      dockerfile: NotificationService/Dockerfile.dev
     ports:
       - "5002:80"
     volumes:
-      - ./NotificationService:/src
+      - ./:/src
       - ~/.nuget/packages:/root/.nuget/packages:ro
+      - ./logs:/app/logs
+    environment:
+      - DOTNET_USE_POLLING_FILE_WATCHER=1
+      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       rabbitmq:
         condition: service_healthy
       notificationdb:
         condition: service_healthy
+    networks:
+      - elastic-net
+
+  authservice:
+    container_name: authservice
+    build:
+      context: .
+      dockerfile: AuthService/Dockerfile.dev
+    ports:
+      - "5003:80"
+    volumes:
+      - ./:/src
+      - ~/.nuget/packages:/root/.nuget/packages:ro
+      - ./logs:/app/logs
     environment:
       - DOTNET_USE_POLLING_FILE_WATCHER=1
+      - ASPNETCORE_ENVIRONMENT=Development
     networks:
       - elastic-net
 
   seq:
     image: datalust/seq:latest
     container_name: seq
-    environment:
-      - ACCEPT_EULA=Y
     ports:
       - "5341:80"
     volumes:
       - seq-data:/data
+    environment:
+      - ACCEPT_EULA=Y
     networks:
       - elastic-net
-  
-volumes:
-  seq-data:
-    name: seq-data
-    
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 networks:
   elastic-net:
-    name: elastic-net
     driver: bridge
+
+volumes:
+  seq-data:
+    
