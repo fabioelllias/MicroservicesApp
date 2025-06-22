@@ -81,7 +81,7 @@ services:
     volumes:
       - mongo_data:/data/db
     healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/27017"]
       interval: 30s
       timeout: 10s
       retries: 5
