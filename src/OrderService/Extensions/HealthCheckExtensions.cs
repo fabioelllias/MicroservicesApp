@@ -23,7 +23,7 @@ public static class HealthCheckExtensions
         services.AddHealthChecksUI(setup =>
         {
             setup.SetEvaluationTimeInSeconds(15);
-            setup.AddHealthCheckEndpoint("Self", "/health");
+            setup.AddHealthCheckEndpoint("Self", "http://orderservice:80/health");
         }).AddInMemoryStorage();
 
         return services;
