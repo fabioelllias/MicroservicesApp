@@ -4,20 +4,43 @@ namespace OrderService.Extensions;
 
 public static class MassTransitExtensions
 {
-    public static IServiceCollection AddRabbitMq(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddCustomMessageBroker(this IServiceCollection services, IConfiguration configuration)
     {
-        var rabbitConfig = configuration.GetSection("RabbitMq");
-
         services.AddMassTransit(x =>
         {
-            x.UsingRabbitMq((ctx, cfg) =>
+            // Registra todos os consumers do assembly atual (você pode ajustar isso)
+            //x.AddConsumers(AppDomain.CurrentDomain.GetAssemblies());
+
+            bool IsDevelopment = configuration.GetSection("RabbitMq")["Host"] == "rabbitmq";
+
+            if (IsDevelopment)
             {
-                cfg.Host(rabbitConfig["Host"], rabbitConfig["VirtualHost"], h =>
+                var rabbitConfig = configuration.GetSection("RabbitMq");
+
+                x.UsingRabbitMq((ctx, cfg) =>
                 {
-                    h.Username(rabbitConfig["Username"]);
-                    h.Password(rabbitConfig["Password"]);
+                    cfg.Host(rabbitConfig["Host"], rabbitConfig["VirtualHost"], h =>
+                    {
+                        h.Username(rabbitConfig["Username"]);
+                        h.Password(rabbitConfig["Password"]);
+                    });
+
+                    cfg.ConfigureEndpoints(ctx);
                 });
-            });
+            }
+            else
+            {
+                var serviceBusConnection = Environment.GetEnvironmentVariable("SERVICEBUS__CONNECTIONSTRING");
+
+                if (string.IsNullOrWhiteSpace(serviceBusConnection))
+                    throw new InvalidOperationException("❌ A connection string do Azure Service Bus não foi encontrada.");
+
+                x.UsingAzureServiceBus((ctx, cfg) =>
+                {
+                    cfg.Host(serviceBusConnection);
+                    cfg.ConfigureEndpoints(ctx);
+                });
+            }
         });
 
         return services;

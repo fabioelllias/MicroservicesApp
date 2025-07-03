@@ -24,12 +24,11 @@ builder.AddSerilogConfiguration();
 // 🗄️ Configuração de banco de dado
 builder.Services.AddDbContext(builder.Configuration);
 
-
 // 📦 MongoDB
 builder.Services.AddMongo(builder.Configuration);
 
 // 🐰 RabbitMQ + MassTransit
-builder.Services.AddRabbitMq(builder.Configuration);
+builder.Services.AddCustomMessageBroker(builder.Configuration);
 
 // 📊 OpenTelemetry + Jaeger
 builder.Services.AddOpenTelemetryConfiguration(builder.Configuration);
