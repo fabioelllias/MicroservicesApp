@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # elasticsearch:
   #   image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
@@ -66,27 +64,27 @@ services:
     networks:
       - elastic-net
 
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   container_name: grafana
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - grafana-storage:/var/lib/grafana
-  #   environment:
-  #     - GF_SECURITY_ADMIN_USER=admin
-  #     - GF_SECURITY_ADMIN_PASSWORD=admin
-  #   depends_on:
-  #     - prometheus
-  #   networks:
-  #     - elastic-net
-  # node-exporter:
-  #   image: prom/node-exporter
-  #   container_name: node-exporter
-  #   ports:
-  #     - "9100:9100"
-  #   networks:
-  #     - elastic-net
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - elastic-net
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - elastic-net
 
 
 volumes:
@@ -100,4 +98,4 @@ volumes:
         
 networks:
   elastic-net:
-    external: true
+    driver: bridge

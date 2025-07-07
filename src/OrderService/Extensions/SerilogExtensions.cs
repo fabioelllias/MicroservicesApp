@@ -10,11 +10,6 @@ public static class SerilogExtensions
 {
     public static void AddSerilogConfiguration(this WebApplicationBuilder builder)
     {
-        var environment = builder.Environment.EnvironmentName;
-        var logPath = Path.Combine(AppContext.BaseDirectory, "logs", "orderservice-log-.txt");
-
-        var elasticUri = builder.Configuration["ElasticConfiguration:Uri"];
-        var seqUri = builder.Configuration["SeqConfiguration:Uri"];
 
         var loggerConfig = new LoggerConfiguration()
             .MinimumLevel.Debug()
@@ -24,6 +19,11 @@ public static class SerilogExtensions
 
         if (builder.Environment.IsDevelopment())
         {
+            var logPath = Path.Combine(AppContext.BaseDirectory, "logs", "orderservice-log-.txt");
+
+            var elasticUri = builder.Configuration["ElasticConfiguration:Uri"];
+            var seqUri = builder.Configuration["SeqConfiguration:Uri"];
+
             // Somente em DEV: logs em arquivo, Seq e Elastic
             loggerConfig.WriteTo.File(logPath, rollingInterval: RollingInterval.Day, shared: true);
 
@@ -47,11 +47,16 @@ public static class SerilogExtensions
         else
         {
             // Em produção: Application Insights (se configurado)
-            var telemetryConfig = builder.Services.BuildServiceProvider().GetService<TelemetryConfiguration>();
+            var appinsightsConnection = Environment.GetEnvironmentVariable("APPINSIGHTS__CONNECTIONSTRING");
 
-            if (telemetryConfig != null)
+            if (!string.IsNullOrWhiteSpace(appinsightsConnection))
             {
-                loggerConfig.WriteTo.ApplicationInsights(telemetryConfig, TelemetryConverter.Traces);
+                var telemetryConfiguration = new TelemetryConfiguration
+                {
+                    ConnectionString = appinsightsConnection
+                };
+
+                loggerConfig.WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces);
             }
         }
 

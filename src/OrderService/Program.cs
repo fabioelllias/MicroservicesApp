@@ -8,6 +8,7 @@ using Contracts.Observability;
 using OrderService.Extensions;
 using OrderService.Configurations;
 using OrderService.Services;
+using OrderService.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,6 +65,9 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseRouting();
+
+// 🔐 Tratamento global de exceções
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseCustomMetrics();
 
