@@ -46,7 +46,8 @@ builder.Services.AddSwaggerDocumentation();
 // ✅ Demais serviços
 builder.Services.AddControllers();
 builder.Services.AddHostedService<OutboxWorker>();
-builder.Services.Configure<EventDeliverySettings>(builder.Configuration.GetSection("EventDelivery"));
+//builder.Services.Configure<EventDeliverySettings>(builder.Configuration.GetSection("EventDelivery"));
+builder.Services.AddEventDelivery(builder.Configuration);
 
 builder.Services.AddScoped<IOrderPublisher, OrderPublisher>();
 builder.Services.AddScoped<IExternalServiceClient, ExternalServiceClient>();

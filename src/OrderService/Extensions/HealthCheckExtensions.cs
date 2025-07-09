@@ -64,7 +64,7 @@ public static class HealthCheckExtensions
         services.AddHealthChecksUI(setup =>
         {
             setup.SetEvaluationTimeInSeconds(15);
-            setup.AddHealthCheckEndpoint("Self", "/health");
+            setup.AddHealthCheckEndpoint("Self", "http://localhost/health");
         }).AddInMemoryStorage();
 
         return services;

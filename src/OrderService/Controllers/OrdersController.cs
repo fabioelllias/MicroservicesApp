@@ -25,7 +25,7 @@ public class OrdersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "❌ Erro ao processar pedido com ID {OrderId}", order?.Id);
-            return StatusCode(500, "Erro ao processar o pedido");
+            throw;
         }
     }
 }
