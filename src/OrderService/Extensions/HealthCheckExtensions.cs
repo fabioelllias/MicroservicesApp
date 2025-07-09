@@ -1,5 +1,9 @@
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using MongoDB.Driver;
+using RabbitMQ.Client;
+using HealthChecks.AzureServiceBus;
 
 namespace OrderService.Extensions;
 
@@ -7,47 +11,44 @@ public static class HealthCheckExtensions
 {
     public static IServiceCollection AddCustomHealthChecks(this IServiceCollection services, IConfiguration configuration)
     {
-        var postgresConnection = configuration.GetSection("PostgresSettings")["ConnectionString"];
-        if (string.IsNullOrWhiteSpace(postgresConnection))
+        var postgresConnection = configuration.GetValue<string>("PostgresSettings:ConnectionString")
+                                 ?? Environment.GetEnvironmentVariable("POSTGRESSETTINGS__CONNECTIONSTRING");
+
+        var mongoConnection = configuration.GetValue<string>("MongoSettings:ConnectionString")
+                               ?? Environment.GetEnvironmentVariable("MONGOSETTINGS__CONNECTIONSTRING");
+
+        var rabbitHost = configuration.GetValue<string>("RabbitMq:Host")
+                          ?? Environment.GetEnvironmentVariable("RABBITMQ__HOST");
+        var rabbitUser = configuration.GetValue<string>("RabbitMq:Username")
+                          ?? Environment.GetEnvironmentVariable("RABBITMQ__USERNAME");
+        var rabbitPass = configuration.GetValue<string>("RabbitMq:Password")
+                          ?? Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD");
+
+        var serviceBusConnection = configuration.GetValue<string>("ServiceBus:ConnectionString")
+                                    ?? Environment.GetEnvironmentVariable("SERVICEBUS__CONNECTIONSTRING");
+
+        var builder = services.AddHealthChecks();
+
+        if (!string.IsNullOrWhiteSpace(postgresConnection))
         {
-            postgresConnection = Environment.GetEnvironmentVariable("POSTGRESSETTINGS__CONNECTIONSTRING");
-            Console.WriteLine("⚠️ Fallback: lendo ConnectionString do PostgreSQL do Environment => " + postgresConnection);
+            builder.AddNpgSql(postgresConnection, name: "PostgreSQL");
         }
 
-        var rabbitHost = configuration["RabbitMq:Host"];
-        if (string.IsNullOrWhiteSpace(rabbitHost))
+        if (!string.IsNullOrWhiteSpace(mongoConnection))
         {
-            rabbitHost = Environment.GetEnvironmentVariable("RABBITMQ__HOST");
-            Console.WriteLine("⚠️ Fallback: lendo RabbitMQ Host do Environment => " + rabbitHost);
+            builder.AddMongoDb(sp =>
+            {
+                var settings = MongoClientSettings.FromConnectionString(mongoConnection);
+                return new MongoClient(settings);
+            }, name: "MongoDB");
         }
 
-        var rabbitUser = configuration["RabbitMq:Username"];
-        if (string.IsNullOrWhiteSpace(rabbitUser))
-        {
-            rabbitUser = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME");
-        }
-
-        var rabbitPass = configuration["RabbitMq:Password"];
-        if (string.IsNullOrWhiteSpace(rabbitPass))
-        {
-            rabbitPass = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD");
-        }
-
-        if (string.IsNullOrWhiteSpace(postgresConnection))
-        {
-            Console.WriteLine("❌ String de conexão do PostgreSQL não encontrada. HealthCheck não será configurado.");
-            return services;
-        }
-
-        services.AddHealthChecks()
-            .AddNpgSql(postgresConnection, name: "PostgreSQL");
-
-        // Se houver dados de conexão com RabbitMQ
         if (!string.IsNullOrWhiteSpace(rabbitHost) &&
             !string.IsNullOrWhiteSpace(rabbitUser) &&
             !string.IsNullOrWhiteSpace(rabbitPass))
         {
-            services.AddHealthChecks().AddRabbitMQ(_ =>
+            var uri = $"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:5672";
+            builder.AddRabbitMQ(_ =>
             {
                 var factory = new RabbitMQ.Client.ConnectionFactory()
                 {
@@ -56,12 +57,17 @@ public static class HealthCheckExtensions
                 return factory.CreateConnectionAsync();
             }, name: "RabbitMQ");
         }
-        else
+
+        if (!string.IsNullOrWhiteSpace(serviceBusConnection))
         {
-            Console.WriteLine("⚠️ RabbitMQ não configurado para HealthCheck.");
+            builder.AddAzureServiceBusQueue(
+                serviceBusConnection,
+                queueName: "order-service-queue",
+                name: "AzureServiceBus",
+                timeout: TimeSpan.FromSeconds(5));
         }
 
-        services.AddHealthChecksUI(setup =>
+        builder.Services.AddHealthChecksUI(setup =>
         {
             setup.SetEvaluationTimeInSeconds(15);
             setup.AddHealthCheckEndpoint("Self", "http://localhost/health");
@@ -69,7 +75,6 @@ public static class HealthCheckExtensions
 
         return services;
     }
-
 
     public static IApplicationBuilder UseCustomHealthChecks(this IApplicationBuilder app)
     {

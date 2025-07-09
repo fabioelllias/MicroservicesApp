@@ -19,13 +19,13 @@ public class OrderServiceClient : IOrderServiceClient
         ILogger<OrderServiceClient> logger,
         OrderDbContext context,
         IMongoCollection<OutboxMessage> outboxCollection,
-        IOptions<EventDeliverySettings> deliverySettings)
+        EventDeliverySettings deliverySettings)
     {
         _orderPublisher = orderPublisher;
         _logger = logger;
         _context = context;
         _outboxCollection = outboxCollection;
-        _deliverySettings = deliverySettings.Value;
+        _deliverySettings = deliverySettings;
     }
 
     public async Task ProcessOrderAsync(Order order)
@@ -43,6 +43,8 @@ public class OrderServiceClient : IOrderServiceClient
             _logger.LogInformation("✅ Pedido salvo no banco com ID {OrderId}", order.Id);
 
             var strategy = _deliverySettings.Strategy.ToLowerInvariant();
+
+            _logger.LogInformation("📦 Estratégia de entrega configurada: {Strategy}", strategy);
 
             if (strategy == "outbox")
             {

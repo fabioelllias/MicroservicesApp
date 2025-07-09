@@ -76,6 +76,8 @@ app.MapControllers();
 
 app.UseCustomHealthChecks();
 
+app.MapGet("/", () => Results.Ok("🚀 OrderService está rodando!"));
+
 try
 {
     Log.Information("🚀 OrderService iniciado");

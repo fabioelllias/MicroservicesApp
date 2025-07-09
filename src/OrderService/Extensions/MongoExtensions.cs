@@ -19,19 +19,19 @@ namespace OrderService.Extensions
             if (string.IsNullOrWhiteSpace(mongoSettings?.ConnectionString))
             {
                 mongoSettings ??= new MongoSettings(); // garante instância não nula
-                mongoSettings.ConnectionString = Environment.GetEnvironmentVariable("MONGODBSETTINGS__CONNECTIONSTRING");
+                mongoSettings.ConnectionString = Environment.GetEnvironmentVariable("MONGOSETTINGS__CONNECTIONSTRING");
                 Console.WriteLine("⚠️ Fallback: lendo MongoDB ConnectionString do Environment => " +
                                   (string.IsNullOrEmpty(mongoSettings.ConnectionString) ? "(vazio)" : "✅ encontrado"));
             }
 
             if (string.IsNullOrWhiteSpace(mongoSettings?.DatabaseName))
             {
-                mongoSettings.DatabaseName = Environment.GetEnvironmentVariable("MONGODBSETTINGS__DATABASENAME");
+                mongoSettings.DatabaseName = Environment.GetEnvironmentVariable("MONGOSETTINGS__DATABASENAME");
             }
 
             if (string.IsNullOrWhiteSpace(mongoSettings?.OutboxCollection))
             {
-                mongoSettings.OutboxCollection = Environment.GetEnvironmentVariable("MONGODBSETTINGS__OUTBOXCOLLECTION");
+                mongoSettings.OutboxCollection = Environment.GetEnvironmentVariable("MONGOSETTINGS__OUTBOXCOLLECTION");
             }
 
             if (string.IsNullOrWhiteSpace(mongoSettings.ConnectionString) ||
