@@ -21,8 +21,8 @@ public static class MassTransitExtensions
                 {
                     cfg.Host(rabbitConfig["Host"], rabbitConfig["VirtualHost"], h =>
                     {
-                        h.Username(rabbitConfig["Username"]);
-                        h.Password(rabbitConfig["Password"]);
+                        h.Username(rabbitConfig["Username"] ?? "guest");
+                        h.Password(rabbitConfig["Password"] ?? "guest");
                     });
 
                     cfg.ConfigureEndpoints(ctx);

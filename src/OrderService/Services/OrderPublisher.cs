@@ -22,7 +22,8 @@ namespace OrderService.Services
 
             var publishTask = _publishEndpoint.Publish(order, context =>
             {
-                var propagationContext = new PropagationContext(Activity.Current.Context, Baggage.Current);
+                var activityContext = Activity.Current != null ? Activity.Current.Context : default;
+                var propagationContext = new PropagationContext(activityContext, Baggage.Current);
 
                 Propagators.DefaultTextMapPropagator.Inject(
                     propagationContext,

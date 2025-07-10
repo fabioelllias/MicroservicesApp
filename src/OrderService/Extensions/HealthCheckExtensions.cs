@@ -1,9 +1,6 @@
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MongoDB.Driver;
-using RabbitMQ.Client;
-using HealthChecks.AzureServiceBus;
 
 namespace OrderService.Extensions;
 

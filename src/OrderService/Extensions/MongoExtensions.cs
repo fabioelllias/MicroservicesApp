@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using MongoDB.Driver;
 using OrderService.Configurations;
 using OrderService.Models;
@@ -13,25 +9,24 @@ namespace OrderService.Extensions
         public static IServiceCollection AddMongo(this IServiceCollection services, IConfiguration configuration)
         {
             // Carrega da configuração
-            var mongoSettings = configuration.GetSection("MongoSettings").Get<MongoSettings>();
+            var mongoSettings = configuration.GetSection("MongoSettings").Get<MongoSettings>() ?? new MongoSettings();
 
             // Fallback para variáveis de ambiente (caso use Container App)
-            if (string.IsNullOrWhiteSpace(mongoSettings?.ConnectionString))
+            if (string.IsNullOrWhiteSpace(mongoSettings.ConnectionString))
             {
-                mongoSettings ??= new MongoSettings(); // garante instância não nula
-                mongoSettings.ConnectionString = Environment.GetEnvironmentVariable("MONGOSETTINGS__CONNECTIONSTRING");
+                mongoSettings.ConnectionString = Environment.GetEnvironmentVariable("MONGOSETTINGS__CONNECTIONSTRING") ?? string.Empty;
                 Console.WriteLine("⚠️ Fallback: lendo MongoDB ConnectionString do Environment => " +
                                   (string.IsNullOrEmpty(mongoSettings.ConnectionString) ? "(vazio)" : "✅ encontrado"));
             }
 
-            if (string.IsNullOrWhiteSpace(mongoSettings?.DatabaseName))
+            if (string.IsNullOrWhiteSpace(mongoSettings.DatabaseName))
             {
-                mongoSettings.DatabaseName = Environment.GetEnvironmentVariable("MONGOSETTINGS__DATABASENAME");
+                mongoSettings.DatabaseName = Environment.GetEnvironmentVariable("MONGOSETTINGS__DATABASENAME") ?? string.Empty;
             }
 
-            if (string.IsNullOrWhiteSpace(mongoSettings?.OutboxCollection))
+            if (string.IsNullOrWhiteSpace(mongoSettings.OutboxCollection))
             {
-                mongoSettings.OutboxCollection = Environment.GetEnvironmentVariable("MONGOSETTINGS__OUTBOXCOLLECTION");
+                mongoSettings.OutboxCollection = Environment.GetEnvironmentVariable("MONGOSETTINGS__OUTBOXCOLLECTION") ?? string.Empty;
             }
 
             if (string.IsNullOrWhiteSpace(mongoSettings.ConnectionString) ||

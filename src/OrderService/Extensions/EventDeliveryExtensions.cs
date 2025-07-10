@@ -12,7 +12,7 @@ public static class EventDeliveryExtensions
         if (string.IsNullOrWhiteSpace(eventDeliverySettings?.Strategy))
         {
             eventDeliverySettings ??= new EventDeliverySettings(); // garante instância não nula
-            eventDeliverySettings.Strategy = Environment.GetEnvironmentVariable("EVENTDELIVERY__STRATEGY");
+            eventDeliverySettings.Strategy = Environment.GetEnvironmentVariable("EVENTDELIVERY__STRATEGY") ?? string.Empty;
 
             Console.WriteLine("⚠️ Fallback: lendo EventDelivery do Environment => " +
                                   (string.IsNullOrEmpty(eventDeliverySettings.Strategy) ? "(vazio)" : "✅ encontrado"));

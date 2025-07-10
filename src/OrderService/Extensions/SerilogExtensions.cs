@@ -2,7 +2,6 @@ using Contracts.Observability;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 using Microsoft.ApplicationInsights.Extensibility;
-using Serilog.Sinks.ApplicationInsights;
 
 namespace OrderService.Extensions;
 

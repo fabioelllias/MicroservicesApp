@@ -1,5 +1,4 @@
 using OrderService.Policies;
-using Polly;
 
 namespace OrderService.Extensions;
 

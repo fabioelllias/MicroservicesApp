@@ -1,5 +1,3 @@
-using OpenTelemetry;
-using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;

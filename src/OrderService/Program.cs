@@ -1,12 +1,7 @@
-using Microsoft.EntityFrameworkCore;
 using Serilog;
-using OpenTelemetry.Context.Propagation;
-using OpenTelemetry;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Contracts.Observability;
 using OrderService.Extensions;
-using OrderService.Configurations;
 using OrderService.Services;
 using OrderService.Middlewares;
 
