@@ -36,6 +36,7 @@ public class OrderServiceClient : IOrderServiceClient
             // usado para testar a resiliencia com polly a serviço externo
             // var result = await _externalClient.GetDataAsync();
             // _logger.LogInformation("Dados recebidos do serviço externo: {Data}", result);
+            order.Id = Guid.NewGuid();
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();

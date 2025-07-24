@@ -6,30 +6,21 @@ public static class EventDeliveryExtensions
 {
     public static IServiceCollection AddEventDelivery(this IServiceCollection services, IConfiguration configuration)
     {
-        var eventDeliverySettings = configuration.GetSection("EventDeliverySettings").Get<EventDeliverySettings>(); 
+        var eventDeliverySettings = configuration.GetSection("EventDeliverySettings").Get<EventDeliverySettings>() ?? new EventDeliverySettings();
 
-        // Fallback: variável de ambiente EVENTDELIVERY__STRATEGY
-        if (string.IsNullOrWhiteSpace(eventDeliverySettings?.Strategy))
-        {
-            eventDeliverySettings ??= new EventDeliverySettings(); // garante instância não nula
-            eventDeliverySettings.Strategy = Environment.GetEnvironmentVariable("EVENTDELIVERY__STRATEGY") ?? string.Empty;
+        var strategy = Environment.GetEnvironmentVariable("EVENTDELIVERY__STRATEGY") ?? string.Empty;
+        if (strategy != null)
+            eventDeliverySettings.Strategy = strategy;
 
-            Console.WriteLine("⚠️ Fallback: lendo EventDelivery do Environment => " +
-                                  (string.IsNullOrEmpty(eventDeliverySettings.Strategy) ? "(vazio)" : "✅ encontrado"));
-        }        
+        var publishMechanism = Environment.GetEnvironmentVariable("EVENTDELIVERY__PUBLISHMECHANISM") ?? string.Empty;
+        if (publishMechanism != null)
+            eventDeliverySettings.PublishMechanism = publishMechanism;
 
-        if (string.IsNullOrWhiteSpace(eventDeliverySettings.Strategy))
-        {
-            Console.WriteLine("⚠️ EventDelivery.Strategy não configurado. Usando 'Direct' como padrão.");
-            eventDeliverySettings.Strategy = "Direct";
-        }
-        else
-        {
-            Console.WriteLine($"✅ EventDelivery.Strategy => {eventDeliverySettings.Strategy}");
-        }
+        Console.WriteLine($"✅ EventDelivery.Strategy => {eventDeliverySettings.Strategy}");
+        Console.WriteLine($"✅ EventDelivery.PublishMechanism => {eventDeliverySettings.PublishMechanism}");
 
         services.AddSingleton(eventDeliverySettings);
-        return services;
 
+        return services;
     }
 }

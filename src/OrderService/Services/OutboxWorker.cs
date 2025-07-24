@@ -1,6 +1,4 @@
 using Contracts;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using OrderService.Models;
 using System.Text.Json;
@@ -64,7 +62,7 @@ namespace OrderService.Services
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "❌ Falha ao publicar evento {OutboxId}", message.Id);
+                            _logger.LogError(ex, "❌ Falha ao publicar evento {OutboxId}:{Detalhes}", message.Id, ex.ToString());
 
                             var update = Builders<OutboxMessage>.Update
                                 .Set(x => x.RetryCount, message.RetryCount + 1);
@@ -79,7 +77,7 @@ namespace OrderService.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "❌ Erro geral no OutboxWorker");
+                    _logger.LogError(ex, "❌ Erro geral no OutboxWorker:" + ex.ToString());
                 }
 
                 await Task.Delay(_interval, stoppingToken);

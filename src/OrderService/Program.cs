@@ -17,6 +17,13 @@ builder.Configuration
 // 🔥 Configuração de Logs
 builder.AddSerilogConfiguration();
 
+builder.Services.AddLogging(logging =>
+{
+    logging.AddConsole();
+    logging.SetMinimumLevel(LogLevel.Debug); // <- força MassTransit a emitir os detalhes
+});
+
+
 // 🗄️ Configuração de banco de dado
 builder.Services.AddDbContext(builder.Configuration);
 

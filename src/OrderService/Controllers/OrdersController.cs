@@ -24,7 +24,7 @@ public class OrdersController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Erro ao processar pedido com ID {OrderId}", order?.Id);
+            _logger.LogError(ex, "❌ Erro ao processar pedido com ID {OrderId}: {Message}", order?.Id, ex.ToString());
             throw;
         }
     }

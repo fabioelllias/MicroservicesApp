@@ -3,29 +3,35 @@ using MassTransit;
 using NotificationService.Data;
 using NotificationService.Models;
 
-namespace NotificationService
+namespace NotificationService;
+
+public class OrderConsumer : IConsumer<Order>
 {
-    public class OrderConsumer : IConsumer<Order>
+    private readonly NotificationDbContext _context;
+    private readonly ILogger<OrderConsumer> _logger;
+    private readonly IHostEnvironment _env;
+
+    public OrderConsumer(NotificationDbContext context, ILogger<OrderConsumer> logger, IHostEnvironment env)
     {
-        private readonly NotificationDbContext _db;
+        _context = context;
+        _logger = logger;
+        _env = env;
+    }
 
-        public OrderConsumer(NotificationDbContext db)
+    public async Task Consume(ConsumeContext<Order> context)
+    {
+        var order = context.Message;
+
+        _logger.LogInformation("📨 Pedido recebido no NotificationService: {OrderId}", order.Id);
+
+        _context.Notifications.Add(new Notification
         {
-            _db = db;
-        }
+            Id = order.Id,
+            Message = $"Novo pedido recebido: {order.ProductName}",
+            CreatedAt = DateTime.UtcNow
+        });
 
-        public async Task Consume(ConsumeContext<Order> context)
-        {
-            var order = context.Message;
-            Console.WriteLine($"[Notification] Enviando notificação para pedido: {order.ProductName}");
-
-            var notification = new Notification
-            {
-                Message = $"Novo pedido recebido: {order.ProductName} (Qtd: {order.Quantity})"
-            };
-
-            _db.Notifications.Add(notification);
-            await _db.SaveChangesAsync();
-        }
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("💾 Notificação salva no banco para o pedido {OrderId}", order.Id);
     }
 }

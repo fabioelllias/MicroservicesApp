@@ -3,12 +3,14 @@
 set -e
 
 # Variáveis
-IMAGE_NAME="fabioellias/orderservice"
+IMAGE_NAME="fabioellias/notificationservice"
 TAG="latest"
-DOCKERFILE_PATH="OrderService/Dockerfile"
+DOCKERFILE_PATH="NotificationService/Dockerfile"
 RESOURCE_GROUP="microservices-rg"
-CONTAINERAPP_NAME="orderservice"
+CONTAINERAPP_NAME="notificationservice"
 REVISION_SUFFIX="rev-$(date +%s)" # timestamp único
+
+echo "🕒 Nova tag gerada: $TAG"
 
 echo "📦 Build da imagem Docker..."
 docker build -t ${IMAGE_NAME}:${TAG} -f ${DOCKERFILE_PATH} .

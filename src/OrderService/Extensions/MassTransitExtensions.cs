@@ -1,3 +1,4 @@
+using Contracts;
 using MassTransit;
 
 namespace OrderService.Extensions;
@@ -38,8 +39,19 @@ public static class MassTransitExtensions
                 x.UsingAzureServiceBus((ctx, cfg) =>
                 {
                     cfg.Host(serviceBusConnection);
+
+                    // Força envio direto para fila (usando Send)
+                    cfg.Message<Order>(x => x.SetEntityName("notification-service-queue"));
+
+                    cfg.UseMessageRetry(r => r.Intervals(
+                        TimeSpan.FromSeconds(5),
+                        TimeSpan.FromSeconds(15),
+                        TimeSpan.FromSeconds(30)
+                    ));
+
                     cfg.ConfigureEndpoints(ctx);
                 });
+
             }
         });
 
