@@ -1,0 +1,83 @@
+name: CD - Azure Container Apps
+
+on:
+  workflow_run:
+    workflows: ["Testes de Integração e Cobertura"]  # Nome exato do seu CI
+    types: [completed]
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - name: OrderService
+            containerapp: orderservice
+            image: orderservice
+            is_web: true
+          - name: PaymentService
+            containerapp: paymentservice
+            image: paymentservice
+            is_web: false
+          - name: NotificationService
+            containerapp: notificationservice
+            image: notificationservice
+            is_web: false   # worker -> sem smoke
+
+    steps:
+      - name: 🔐 Login no Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: 🔗 Registrar GHCR (idempotente)
+        run: |
+          az containerapp registry set \
+            --name ${{ matrix.service.containerapp }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --server ghcr.io \
+            --username ${{ secrets.GHCR_USERNAME }} \
+            --password ${{ secrets.GHCR_TOKEN }}
+
+      - name: 🏷️ Calcular tag (sha7 do CI)
+        id: vars
+        shell: bash
+        run: |
+          SHA="${{ github.event.workflow_run.head_sha }}"
+          echo "sha7=${SHA:0:7}" >> $GITHUB_OUTPUT
+          echo "owner=${{ github.repository_owner }}" >> $GITHUB_OUTPUT
+
+      - name: 🚀 Atualizar imagem
+        run: |
+          az containerapp update \
+            --name ${{ matrix.service.containerapp }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --image ghcr.io/${{ steps.vars.outputs.owner }}/${{ matrix.service.image }}:${{ steps.vars.outputs.sha7 }}
+
+      - name: 🚬 Smoke Test (somente para APIs)
+        if: ${{ matrix.service.is_web == true }}
+        shell: bash
+        run: |
+          APP=${{ matrix.service.containerapp }}
+          RG=${{ secrets.RESOURCE_GROUP }}
+          PATH_TO_CHECK="/health"
+
+          # pega FQDN
+          for i in {1..30}; do
+            FQDN=$(az containerapp show -n "$APP" -g "$RG" --query "properties.latestRevisionFqdn" -o tsv 2>/dev/null || true)
+            [ -n "$FQDN" ] && break
+            echo "Aguardando FQDN... ($i/30)"; sleep 4
+          done
+          [ -z "$FQDN" ] && echo "❌ Sem FQDN" && exit 1
+          echo "FQDN: $FQDN"
+
+          # tenta 200
+          for i in {1..40}; do
+            curl -sSf -k "https://$FQDN$PATH_TO_CHECK" >/dev/null && { echo "✅ OK"; exit 0; }
+            curl -sSf -k "http://$FQDN$PATH_TO_CHECK"  >/dev/null && { echo "✅ OK"; exit 0; }
+            echo "Aguardando resposta ($i/40)..."; sleep 5
+          done
+          echo "❌ Smoke test falhou em $FQDN$PATH_TO_CHECK"; exit 1

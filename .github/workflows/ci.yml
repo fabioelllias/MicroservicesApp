@@ -1,0 +1,142 @@
+name: Testes de Integração e Cobertura
+
+on:
+  push:
+    branches: [ cloud, main ]
+  pull_request:
+    branches: [ cloud, main ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      rabbitmq:
+        image: rabbitmq:3.12-management
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: >-
+          --health-cmd="rabbitmq-diagnostics -q ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: payment
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
+    env:
+      # Se seus testes usam essas variáveis, ajuste os nomes conforme seu app
+      ConnectionStrings__Postgres: Host=localhost;Port=5432;Database=payment;Username=postgres;Password=postgres
+      RabbitMq__Host: localhost
+      RabbitMq__Username: guest
+      RabbitMq__Password: guest
+      # Impede mensagens ruidosas nos testes
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+
+      - name: 🧰 Instalar SDK do .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          cache: true
+
+      - name: 🧳 Cache de pacotes NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: ⏳ Aguardar Postgres ficar pronto
+        run: |
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U postgres; then
+              echo "Postgres pronto"; break
+            fi
+            echo "Aguardando Postgres... ($i/30)"; sleep 2
+          done
+
+      - name: ⏳ Aguardar RabbitMQ ficar pronto
+        run: |
+          for i in {1..30}; do
+            if docker inspect --format='{{json .State.Health.Status}}' ${{ job.services.rabbitmq.id }} | grep -q healthy; then
+              echo "RabbitMQ pronto"; break
+            fi
+            echo "Aguardando RabbitMQ... ($i/30)"; sleep 2
+          done
+
+      - name: 🧱 Restaurar pacotes
+        run: dotnet restore MicroservicesApp.sln
+
+      - name: 🛠️ Buildar solução
+        run: dotnet build MicroservicesApp.sln --no-restore --configuration Release
+
+      - name: 🧪 Rodar testes com cobertura (XPlat)
+        run: |
+          # Se usa coverlet.collector moderno, pode forçar Cobertura:
+          # dotnet test IntegrationTests/IntegrationTests.csproj \
+          #   --no-build --configuration Release \
+          #   --collect:"XPlat Code Coverage;Format=cobertura" \
+          #   --logger trx --results-directory TestResults
+
+          dotnet test IntegrationTests/IntegrationTests.csproj \
+            --no-build --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --logger trx \
+            --results-directory TestResults
+
+          mkdir -p TestResults/coverage
+          # Copia o primeiro relatório Cobertura encontrado
+          COV=$(find TestResults -name '*coverage.cobertura.xml' -o -name '*.cobertura.xml' -o -name '*.xml' | head -1 || true)
+          if [ -n "$COV" ]; then
+            cp "$COV" TestResults/coverage/coverage.cobertura.xml
+          else
+            echo "⚠️ Nenhum arquivo de cobertura encontrado."
+          fi
+
+      - name: 📊 Gerar relatório de cobertura
+        if: always()
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.2.0
+        with:
+          reports: 'TestResults/coverage/coverage.cobertura.xml'
+          targetdir: 'coveragereport'
+          reporttypes: 'HtmlInline_AzurePipelines;Cobertura'
+          assemblyfilters: '+*'
+          classfilters: '+*'
+
+      - name: 📎 Publicar relatório como artefato
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-de-codigo
+          path: coveragereport
+          retention-days: 7
+
+      - name: 🌐 Publicar no GitHub Pages (somente push no main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./coveragereport
+          force_orphan: true
