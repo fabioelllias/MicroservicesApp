@@ -50,7 +50,7 @@ jobs:
         run: |
           mkdir -p TestResults/coverage
           OUT="$(pwd)/TestResults/coverage/"
-          dotnet test IntegrationTests/IntegrationTests.csproj \
+          dotnet test src/IntegrationTests/IntegrationTests.csproj \
             --no-build \
             --configuration Release \
             /p:CollectCoverage=true \
