@@ -46,15 +46,16 @@ jobs:
       - name: 🛠️ Buildar solução
         run: dotnet build src/MicroservicesApp.sln --no-restore --configuration Release
 
-      # <<<<< ALTERADO: força saída única Cobertura usando coverlet.msbuild >>>>>
       - name: 🧪 Rodar testes com cobertura (Coverlet MSBuild)
         run: |
-          dotnet test src/IntegrationTests/IntegrationTests.csproj \
+          mkdir -p TestResults/coverage
+          OUT="$(pwd)/TestResults/coverage/"
+          dotnet test IntegrationTests/IntegrationTests.csproj \
             --no-build \
             --configuration Release \
             /p:CollectCoverage=true \
-            /p:CoverletOutput=TestResults/coverage/ \
-            /p:CoverletOutputFormat=cobertura
+            "/p:CoverletOutput=${OUT}" \
+            /p:CoverletOutputFormat=cobertura \
 
       - name: 📊 Gerar relatório de cobertura
         uses: danielpalme/ReportGenerator-GitHub-Action@5.2.0
