@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
-<coverage line-rate="0.1926605504587156" branch-rate="0.2777777777777778" lines-covered="42" lines-valid="218" branches-covered="5" branches-valid="18" complexity="32" version="0" timestamp="1750267027">
+<coverage line-rate="0.1926605504587156" branch-rate="0.2777777777777778" lines-covered="42" lines-valid="218" branches-covered="5" branches-valid="18" complexity="32" version="0" timestamp="1754909022">
   <sources>
-    <source>/home/runner/work/MicroservicesApp/MicroservicesApp/</source>
+    <source>/home/runner/work/MicroservicesApp/MicroservicesApp/src/</source>
   </sources>
   <packages>
     <package name="Contracts" line-rate="0.5714285714285714" branch-rate="0" complexity="11">
       <classes>
-        <class name="Contracts.Observability.ActivityEnricher" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/Contracts/Observability/ActivityEnricher.cs" line-rate="0" branch-rate="0" complexity="2">
+        <class name="Contracts.Observability.ActivityEnricher" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/src/Contracts/Observability/ActivityEnricher.cs" line-rate="0" branch-rate="0" complexity="2">
           <methods>
             <method name="Enrich" signature="(Serilog.Events.LogEvent,Serilog.Core.ILogEventPropertyFactory)" line-rate="0" branch-rate="0" complexity="2">
               <lines>
@@ -27,7 +27,7 @@
             <line number="18" hits="0" branch="false" />
           </lines>
         </class>
-        <class name="Contracts.Order" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/Contracts/Order.cs" line-rate="1" branch-rate="1" complexity="4">
+        <class name="Contracts.Order" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/src/Contracts/Order.cs" line-rate="1" branch-rate="1" complexity="4">
           <methods>
             <method name="get_Id" signature="()" line-rate="1" branch-rate="1" complexity="1">
               <lines>
@@ -57,7 +57,7 @@
             <line number="11" hits="5" branch="false" />
           </lines>
         </class>
-        <class name="Contracts.Payment" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/Contracts/Payment.cs" line-rate="0.8" branch-rate="1" complexity="5">
+        <class name="Contracts.Payment" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/src/Contracts/Payment.cs" line-rate="0.8" branch-rate="1" complexity="5">
           <methods>
             <method name="get_Id" signature="()" line-rate="1" branch-rate="1" complexity="1">
               <lines>
@@ -97,7 +97,7 @@
     </package>
     <package name="PaymentService" line-rate="0.16666666666666666" branch-rate="0.3125" complexity="21">
       <classes>
-        <class name="OrderConsumer" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/PaymentService/OrderConsumer.cs" line-rate="0.8" branch-rate="0.3125" complexity="12">
+        <class name="OrderConsumer" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/src/PaymentService/OrderConsumer.cs" line-rate="0.8" branch-rate="0.3125" complexity="12">
           <methods>
             <method name=".ctor" signature="(PaymentDbContext)" line-rate="1" branch-rate="1" complexity="1">
               <lines>
@@ -195,7 +195,7 @@
             <line number="62" hits="1" branch="false" />
           </lines>
         </class>
-        <class name="PaymentDbContext" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/PaymentService/PaymentDbContext.cs" line-rate="1" branch-rate="1" complexity="2">
+        <class name="PaymentDbContext" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/src/PaymentService/PaymentDbContext.cs" line-rate="1" branch-rate="1" complexity="2">
           <methods>
             <method name="get_Payments" signature="()" line-rate="1" branch-rate="1" complexity="1">
               <lines>
@@ -213,7 +213,7 @@
             <line number="8" hits="2" branch="false" />
           </lines>
         </class>
-        <class name="PaymentService.Migrations.InitialCreate" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/PaymentService/Migrations/20250509221100_InitialCreate.cs" line-rate="0" branch-rate="1" complexity="2">
+        <class name="PaymentService.Migrations.InitialCreate" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/src/PaymentService/Migrations/20250509221100_InitialCreate.cs" line-rate="0" branch-rate="1" complexity="2">
           <methods>
             <method name="Up" signature="(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)" line-rate="0" branch-rate="1" complexity="1">
               <lines>
@@ -263,7 +263,7 @@
             <line number="35" hits="0" branch="false" />
           </lines>
         </class>
-        <class name="PaymentService.Migrations.InitialCreate" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/PaymentService/Migrations/20250509221100_InitialCreate.Designer.cs" line-rate="0" branch-rate="1" complexity="1">
+        <class name="PaymentService.Migrations.InitialCreate" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/src/PaymentService/Migrations/20250509221100_InitialCreate.Designer.cs" line-rate="0" branch-rate="1" complexity="1">
           <methods>
             <method name="BuildTargetModel" signature="(Microsoft.EntityFrameworkCore.ModelBuilder)" line-rate="0" branch-rate="1" complexity="1">
               <lines>
@@ -329,7 +329,7 @@
             <line number="51" hits="0" branch="false" />
           </lines>
         </class>
-        <class name="PaymentService.Migrations.PaymentDbContextModelSnapshot" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/PaymentService/Migrations/PaymentDbContextModelSnapshot.cs" line-rate="0" branch-rate="1" complexity="1">
+        <class name="PaymentService.Migrations.PaymentDbContextModelSnapshot" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/src/PaymentService/Migrations/PaymentDbContextModelSnapshot.cs" line-rate="0" branch-rate="1" complexity="1">
           <methods>
             <method name="BuildModel" signature="(Microsoft.EntityFrameworkCore.ModelBuilder)" line-rate="0" branch-rate="1" complexity="1">
               <lines>
@@ -395,7 +395,7 @@
             <line number="48" hits="0" branch="false" />
           </lines>
         </class>
-        <class name="PaymentService.Worker" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/PaymentService/Worker.cs" line-rate="0" branch-rate="1" complexity="2">
+        <class name="PaymentService.Worker" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/src/PaymentService/Worker.cs" line-rate="0" branch-rate="1" complexity="2">
           <methods>
             <method name=".ctor" signature="(MassTransit.IBusControl)" line-rate="0" branch-rate="1" complexity="1">
               <lines>
@@ -435,7 +435,7 @@
             <line number="33" hits="0" branch="false" />
           </lines>
         </class>
-        <class name="Program" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/PaymentService/Program.cs" line-rate="0" branch-rate="1" complexity="1">
+        <class name="Program" filename="/home/runner/work/MicroservicesApp/MicroservicesApp/src/PaymentService/Program.cs" line-rate="0" branch-rate="1" complexity="1">
           <methods>
             <method name="&lt;Main&gt;$" signature="(System.String[])" line-rate="0" branch-rate="1" complexity="1">
               <lines>
