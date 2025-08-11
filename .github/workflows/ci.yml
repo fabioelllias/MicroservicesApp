@@ -41,15 +41,15 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: 🧱 Restaurar pacotes
-        run: dotnet restore MicroservicesApp.sln
+        run: dotnet restore src/MicroservicesApp.sln
 
       - name: 🛠️ Buildar solução
-        run: dotnet build MicroservicesApp.sln --no-restore --configuration Release
+        run: dotnet build src/MicroservicesApp.sln --no-restore --configuration Release
 
       # <<<<< ALTERADO: força saída única Cobertura usando coverlet.msbuild >>>>>
       - name: 🧪 Rodar testes com cobertura (Coverlet MSBuild)
         run: |
-          dotnet test IntegrationTests/IntegrationTests.csproj \
+          dotnet test src/IntegrationTests/IntegrationTests.csproj \
             --no-build \
             --configuration Release \
             /p:CollectCoverage=true \
